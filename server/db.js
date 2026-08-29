@@ -1,9 +1,8 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { createClient } from '@libsql/client'
 
-// Local fallback DB path — only used when TURSO_DATABASE_URL is not set (i.e. never
-// on Netlify). Guarded so a CJS-bundled context without import.meta still works.
+// Local fallback DB path — only used when TURSO_DATABASE_URL is not set (i.e.
+// never on Netlify). Guarded so a CJS-bundled context without import.meta works.
 let localDbUrl = 'file:local.db'
 try {
   localDbUrl = `file:${path.join(path.dirname(fileURLToPath(import.meta.url)), 'local.db')}`
@@ -11,11 +10,11 @@ try {
   /* import.meta unavailable — keep the relative fallback */
 }
 
-// Turso (libSQL) in production; a local file when no env vars are set.
 const url = process.env.TURSO_DATABASE_URL || localDbUrl
 const authToken = process.env.TURSO_AUTH_TOKEN
-
-export const db = createClient(authToken ? { url, authToken } : { url })
+// Remote Turso URL -> use the pure-JS ("web") client (no native addon, works in
+// serverless). Local file:/ URL -> use the Node client which supports files.
+const isRemote = /^(libsql|wss?|https?):/i.test(url)
 
 const SCHEMA = `
   CREATE TABLE IF NOT EXISTS suppliers (
@@ -82,13 +81,20 @@ const SCHEMA = `
 
 const SUPPLIER_SEED = ['MTLNY', 'JAYDEEP', 'SUGAM', 'RUDRA', 'AMMEF', 'KAPIL', 'MGB', 'VISHAL']
 
+let client
 let readyPromise
 
-async function runInit() {
-  await db.executeMultiple(SCHEMA)
-  const { rows } = await db.execute('SELECT COUNT(*) AS count FROM suppliers')
+async function init() {
+  const { createClient } = isRemote
+    ? await import('@libsql/client/web')
+    : await import('@libsql/client')
+
+  client = createClient(authToken ? { url, authToken } : { url })
+
+  await client.executeMultiple(SCHEMA)
+  const { rows } = await client.execute('SELECT COUNT(*) AS count FROM suppliers')
   if (Number(rows[0].count) === 0) {
-    await db.batch(
+    await client.batch(
       SUPPLIER_SEED.map((name) => ({ sql: 'INSERT INTO suppliers (name) VALUES (?)', args: [name] })),
       'write',
     )
@@ -97,6 +103,11 @@ async function runInit() {
 
 // Idempotent; safe to await on every request (runs once per process).
 export function ready() {
-  if (!readyPromise) readyPromise = runInit()
+  if (!readyPromise) readyPromise = init()
   return readyPromise
+}
+
+export function getDb() {
+  if (!client) throw new Error('Database not initialised — call ready() first.')
+  return client
 }

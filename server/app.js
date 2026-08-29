@@ -1,15 +1,15 @@
 import express from 'express'
 import cors from 'cors'
 import { jsPDF } from 'jspdf'
-import { db, ready } from './db.js'
+import { getDb, ready } from './db.js'
 
 const toNumber = (value, fallback = 0) => {
   const num = Number(value)
   return Number.isFinite(num) ? num : fallback
 }
 
-const one = async (sql, args = []) => (await db.execute({ sql, args })).rows[0] || null
-const many = async (sql, args = []) => (await db.execute({ sql, args })).rows
+const one = async (sql, args = []) => (await getDb().execute({ sql, args })).rows[0] || null
+const many = async (sql, args = []) => (await getDb().execute({ sql, args })).rows
 
 const serializeLot = (lot, sizes = [], bales = [], pattern = null) => ({
   id: lot.id,
@@ -125,7 +125,7 @@ app.post('/api/lots', wrap(async (req, res) => {
   const totalMeters = toNumber(payload.totalMeters, 0)
   const average = totalPieces > 0 && totalMeters > 0 ? Number((totalMeters / totalPieces).toFixed(2)) : 0
 
-  const tx = await db.transaction('write')
+  const tx = await getDb().transaction('write')
   let lotId
   try {
     const inserted = await tx.execute({
@@ -197,7 +197,7 @@ app.post('/api/lots', wrap(async (req, res) => {
 
 app.put('/api/lots/:id/status', wrap(async (req, res) => {
   const { status } = req.body || {}
-  const result = await db.execute({
+  const result = await getDb().execute({
     sql: 'UPDATE lots SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
     args: [status, req.params.id],
   })
@@ -312,5 +312,5 @@ app.get('/api/print/:id', wrap(async (req, res) => {
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err)
-  res.status(500).json({ error: 'Something went wrong. Please try again.' })
+  res.status(500).json({ error: err?.message || 'Something went wrong. Please try again.' })
 })
