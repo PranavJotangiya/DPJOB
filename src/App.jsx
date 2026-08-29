@@ -223,31 +223,6 @@ function App() {
     return 0
   }, [lotForm.totalMeters, sizeTotal])
 
-  const validateLot = () => {
-    const nextErrors = []
-
-    if (!lotForm.lotNumber.trim()) nextErrors.push('Please enter the Lot No.')
-    if (!lotForm.supplier.trim()) nextErrors.push('Please select the Fabric Supplier.')
-    if (!lotForm.shortNumber.trim()) nextErrors.push('Please enter the Short No.')
-    if (!lotForm.cuttingDate) nextErrors.push('Please enter the Cutting Date.')
-    if (!lotForm.programDate) nextErrors.push('Please enter the Program Date.')
-    if (lotForm.programDate && lotForm.cuttingDate && new Date(lotForm.cuttingDate) < new Date(lotForm.programDate)) {
-      nextErrors.push('Cutting Date cannot be before Program Date.')
-    }
-    if (Number(lotForm.totalMeters || 0) < 0) nextErrors.push('Fabric meter value cannot be negative.')
-    if (baleTotal > 0 && Number(lotForm.totalMeters || 0) > 0 && Math.abs(baleTotal - Number(lotForm.totalMeters)) > 1) {
-      nextErrors.push(`Fabric meter mismatch: Lot says ${Number(lotForm.totalMeters).toFixed(0)} MTR, but Bale entries total ${baleTotal.toFixed(0)} MTR.`)
-    }
-    if (sizeTotal > 0 && Number(lotForm.totalPieces || 0) > 0 && sizeTotal !== Number(lotForm.totalPieces)) {
-      nextErrors.push(`Size quantities total ${sizeTotal} pcs, but PCS is entered as ${Number(lotForm.totalPieces)}.`)
-    }
-    if (!lotForm.bales.length) nextErrors.push('Please add at least one Bale or Roll entry.')
-    if (Number(lotForm.totalMeters || 0) > 0 && Number(lotForm.totalPieces || 0) > 0 && Number(lotForm.totalMeters) / Number(lotForm.totalPieces) > 3) {
-      nextErrors.push('Average consumption looks unusually high. Please check the values.')
-    }
-
-    return nextErrors
-  }
 
   const generateLotNumber = () => {
     const max = lots.reduce((highest, item) => {
@@ -317,20 +292,7 @@ function App() {
     setMoreOpen(false)
   }
 
-  const isStepValid = (stepIndex) => {
-    if (stepIndex === 0) return lotForm.lotNumber && lotForm.supplier && lotForm.shortNumber && lotForm.programDate && lotForm.cuttingDate
-    if (stepIndex === 1) return lotForm.fabricType && lotForm.color && lotForm.description
-    if (stepIndex === 2) return sizeTotal > 0
-    if (stepIndex === 3) return (lotForm.bales || []).some((bale) => bale.baleNumber && Number(bale.meters || 0) > 0)
-    if (stepIndex === 4) return lotForm.cutting.patternType
-    return true
-  }
-
   const nextStep = () => {
-    if (!isStepValid(wizardStep)) {
-      setErrors(['Please complete the current step before continuing.'])
-      return
-    }
     setErrors([])
     setWizardStep((current) => Math.min(current + 1, 5))
   }
@@ -341,12 +303,6 @@ function App() {
   }
 
   const saveLot = async () => {
-    const nextErrors = validateLot()
-    if (nextErrors.length > 0) {
-      setErrors(nextErrors)
-      return
-    }
-
     const payload = {
       ...lotForm,
       lotNumber: lotForm.lotNumber.trim(),

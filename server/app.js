@@ -99,16 +99,26 @@ app.get('/api/lots', wrap(async (req, res) => {
 
 app.post('/api/lots', wrap(async (req, res) => {
   const payload = req.body || {}
-  const lotNumber = (payload.lotNumber || '').trim()
 
-  if (!lotNumber) return res.status(400).json({ error: 'Please enter the Lot No.' })
-  if (!payload.supplier) return res.status(400).json({ error: 'Please select the Fabric Supplier.' })
-  if (!payload.shortNumber) return res.status(400).json({ error: 'Please enter the Short No.' })
-  if (!payload.cuttingDate) return res.status(400).json({ error: 'Please enter the Cutting Date.' })
-  if (!payload.programDate) return res.status(400).json({ error: 'Please enter the Program Date.' })
-
-  const existing = await one('SELECT id FROM lots WHERE lower(trim(lot_number)) = lower(trim(?))', [lotNumber])
-  if (existing) return res.status(400).json({ error: 'Duplicate Lot No. Please use a different lot number.' })
+  // "Just save" mode: no required-field blocking. Fill defaults and make the
+  // lot number unique so a save never fails.
+  let lotNumber = (payload.lotNumber || '').trim().toUpperCase()
+  if (!lotNumber) {
+    const rows = await many('SELECT lot_number FROM lots')
+    const maxN = rows.reduce((max, row) => {
+      const match = String(row.lot_number || '').match(/(\d+)/)
+      const num = match ? Number(match[1]) : NaN
+      return Number.isFinite(num) ? Math.max(max, num) : max
+    }, 0)
+    lotNumber = `LOT-${maxN + 1}`
+  }
+  const base = lotNumber
+  let suffix = 2
+  // eslint-disable-next-line no-await-in-loop
+  while (await one('SELECT id FROM lots WHERE lot_number = ?', [lotNumber])) {
+    lotNumber = `${base}-${suffix}`
+    suffix += 1
+  }
 
   const sizeEntries = Object.entries(payload.sizeBreakdown || {})
   const totalPieces = sizeEntries.reduce((sum, [, quantity]) => sum + toNumber(quantity, 0), 0)
@@ -125,12 +135,12 @@ app.post('/api/lots', wrap(async (req, res) => {
         total_pieces, status, notes, created_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
-        lotNumber.toUpperCase(),
+        lotNumber,
         payload.date || new Date().toISOString().slice(0, 10),
-        payload.supplier,
-        payload.shortNumber,
-        payload.programDate,
-        payload.cuttingDate,
+        payload.supplier || '',
+        payload.shortNumber || '',
+        payload.programDate || '',
+        payload.cuttingDate || '',
         payload.fabricType || '',
         payload.color || '',
         payload.description || '',
