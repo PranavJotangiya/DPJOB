@@ -30,6 +30,7 @@ const SCHEMA = `
     lot_date TEXT,
     supplier TEXT,
     short_number TEXT,
+    short_name TEXT,
     program_date TEXT,
     cutting_date TEXT,
     fabric_type TEXT,
@@ -92,6 +93,10 @@ async function init() {
   client = createClient(authToken ? { url, authToken } : { url })
 
   await client.executeMultiple(SCHEMA)
+  // Add columns introduced after the first release (no-op if they already exist).
+  for (const alter of ['ALTER TABLE lots ADD COLUMN short_name TEXT']) {
+    try { await client.execute(alter) } catch { /* column already present */ }
+  }
   const { rows } = await client.execute('SELECT COUNT(*) AS count FROM suppliers')
   if (Number(rows[0].count) === 0) {
     await client.batch(

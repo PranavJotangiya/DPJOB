@@ -508,9 +508,58 @@ tbody tr:last-child td { border-bottom: 0; }
   border: 1px solid var(--ok-line);
   color: var(--ok-fg);
   border-radius: var(--r-md);
-  padding: 12px 14px;
+  padding: 12px 40px 12px 40px;
   margin-bottom: 14px;
-  font-weight: 600;
+  font-weight: 650;
+  position: relative;
+}
+.success-banner::before {
+  content: "✓";
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 800;
+}
+
+/* Section helper text inside the form */
+.section-hint {
+  margin: -8px 0 14px;
+  color: var(--ink-3);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.field-hint {
+  color: var(--ink-3);
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 40px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.empty-icon {
+  font-size: 2rem;
+  opacity: 0.55;
+  margin-bottom: 2px;
+}
+.empty-state h4 {
+  margin: 0;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+.empty-state p {
+  margin: 0 0 8px;
+  color: var(--ink-3);
+  font-size: 0.9rem;
+  max-width: 340px;
 }
 
 /* ============================================================
@@ -665,6 +714,28 @@ tbody tr:last-child td { border-bottom: 0; }
   font-weight: 600;
 }
 
+.form-section {
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.form-section:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: 0; }
+.form-section > h3 {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-section > h3::before {
+  content: "";
+  width: 4px;
+  height: 15px;
+  background: var(--brand);
+  border-radius: 2px;
+}
+
 .wizard-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
 
 .field-group { display: flex; flex-direction: column; gap: 6px; }
@@ -751,16 +822,40 @@ tbody tr:last-child td { border-bottom: 0; }
 .wizard-stack { display: flex; flex-direction: column; gap: 14px; }
 .top-gap { margin-top: 4px; }
 
-.bale-row {
+.bale-list {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+}
+
+.bale-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  padding: 14px;
+  padding: 10px;
 }
-.bale-row .danger-button { justify-self: start; }
+.bale-row .field-group:first-child { flex: 1 1 auto; min-width: 0; }
+.bale-row .field-group:nth-child(2) { flex: 0 0 74px; }
+
+.bale-remove {
+  flex: 0 0 auto;
+  width: 38px;
+  min-height: var(--tap);
+  border: 1px solid var(--danger-line);
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+  border-radius: var(--r-sm);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.bale-remove:hover { background: #fecaca; }
+.bale-remove:active { transform: translateY(1px); }
 
 .review-grid { grid-template-columns: 1fr; }
 .review-box {
@@ -897,8 +992,7 @@ tbody tr:last-child td { border-bottom: 0; }
   .mini-size-list { grid-template-columns: repeat(3, 1fr); }
   .lot-detail-grid { grid-template-columns: repeat(2, 1fr); }
   .settings-grid { grid-template-columns: repeat(2, 1fr); }
-  .bale-row { grid-template-columns: repeat(2, 1fr); }
-  .bale-row .danger-button { grid-column: 1 / -1; }
+  .bale-list { grid-template-columns: 1fr 1fr; }
   .modal-backdrop { align-items: center; padding: 24px; }
   .wizard-panel { max-width: 860px; border-radius: var(--r-lg); max-height: 92dvh; }
   .wizard-header { padding-top: 14px; border-radius: var(--r-lg) var(--r-lg) 0 0; }
@@ -944,6 +1038,15 @@ tbody tr:last-child td { border-bottom: 0; }
     padding: 11px 14px;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .nav-ico {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+    flex-shrink: 0;
   }
   .nav-button:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
   .nav-button.active {

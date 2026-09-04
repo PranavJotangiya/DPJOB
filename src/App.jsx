@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { LANGUAGES, makeT } from './i18n.js'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
@@ -21,16 +22,9 @@ const BN_ICONS = {
   newLot: '＋',
   lots: '📋',
   cutting: '✂️',
-}
-
-const PAGE_TITLES = {
-  dashboard: 'Production Dashboard',
-  lots: 'Lot Management',
-  cutting: 'Cutting Board',
-  bale: 'Bale / Fabric Control',
-  reports: 'Reports',
-  settings: 'Settings',
-  newLot: 'New Lot',
+  bale: '🧵',
+  reports: '📊',
+  settings: '⚙️',
 }
 
 const SIZE_OPTIONS = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42]
@@ -44,6 +38,7 @@ const FALLBACK_LOTS = [
     date: '2026-08-25',
     supplier: 'MTLNY',
     shortNumber: 'RUORA-FANCY',
+    shortName: 'RUORA FANCY TOP',
     programDate: '2026-08-27',
     cuttingDate: '2026-08-29',
     fabricType: 'Cotton Poplin',
@@ -83,6 +78,7 @@ const defaultLotForm = () => ({
   date: new Date().toISOString().slice(0, 10),
   supplier: 'MTLNY',
   shortNumber: 'RUORA-FANCY',
+  shortName: 'RUORA FANCY TOP',
   programDate: '',
   cuttingDate: '',
   fabricType: 'Cotton Poplin',
@@ -117,27 +113,34 @@ function App() {
   const [selectedLotId, setSelectedLotId] = useState(FALLBACK_LOTS[0].id)
   const [role, setRole] = useState('Supervisor')
   const [wizardOpen, setWizardOpen] = useState(false)
-  const [wizardStep, setWizardStep] = useState(0)
+  const [editingId, setEditingId] = useState(null)
   const [lotForm, setLotForm] = useState(defaultLotForm())
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('All')
   const [errors, setErrors] = useState([])
   const [statusMessage, setStatusMessage] = useState('')
   const [moreOpen, setMoreOpen] = useState(false)
+  const [lang, setLang] = useState(() => {
+    try { return localStorage.getItem('dpc-lang') || 'en' } catch { return 'en' }
+  })
+
+  const t = useMemo(() => makeT(lang), [lang])
+
+  useEffect(() => {
+    try { localStorage.setItem('dpc-lang', lang) } catch { /* ignore */ }
+    document.documentElement.lang = lang
+  }, [lang])
 
   const fetchLots = async () => {
     try {
       const response = await fetch(`${API_BASE}/api/lots`)
       if (!response.ok) throw new Error('Failed to load lots')
       const payload = await response.json()
-      if (payload.length) {
-        setLots(payload)
-        setSelectedLotId(payload[0].id)
-      } else {
-        setLots(FALLBACK_LOTS)
-        setSelectedLotId(FALLBACK_LOTS[0].id)
-      }
+      // Server reachable: trust it — an empty list means "no lots yet".
+      setLots(payload)
+      if (payload.length) setSelectedLotId(payload[0].id)
     } catch {
+      // Server unreachable: show demo data so the screen is not blank.
       setLots(FALLBACK_LOTS)
       setSelectedLotId(FALLBACK_LOTS[0].id)
     }
@@ -190,6 +193,7 @@ function App() {
         !lowerTerm ||
         item.lotNumber.toLowerCase().includes(lowerTerm) ||
         item.shortNumber.toLowerCase().includes(lowerTerm) ||
+        (item.shortName || '').toLowerCase().includes(lowerTerm) ||
         item.supplier.toLowerCase().includes(lowerTerm) ||
         (item.bales || []).some((bale) => (bale.baleNumber || '').toLowerCase().includes(lowerTerm))
 
@@ -277,13 +281,68 @@ function App() {
   }
 
   const openNewLot = () => {
+    setEditingId(null)
     setWizardOpen(true)
-    setWizardStep(0)
     setErrors([])
     setStatusMessage('')
     setLotForm(defaultLotForm())
     setActiveTab('newLot')
     setMoreOpen(false)
+  }
+
+  const openEditLot = (lot) => {
+    if (!lot) return
+    setEditingId(lot.id)
+    setLotForm({
+      lotNumber: lot.lotNumber || '',
+      date: lot.date || new Date().toISOString().slice(0, 10),
+      supplier: lot.supplier || '',
+      shortNumber: lot.shortNumber || '',
+      shortName: lot.shortName || '',
+      programDate: lot.programDate || '',
+      cuttingDate: lot.cuttingDate || '',
+      fabricType: lot.fabricType || '',
+      color: lot.color || '',
+      description: lot.description || '',
+      pana: lot.pana || 0,
+      totalMeters: lot.totalMeters || 0,
+      averageConsumption: lot.averageConsumption || 0,
+      totalPieces: lot.totalPieces || 0,
+      notes: lot.notes || '',
+      status: lot.status || 'Draft',
+      createdBy: lot.createdBy || 'Operator 01',
+      sizeBreakdown: {
+        ...createEmptySizeBreakdown(),
+        ...Object.fromEntries(Object.entries(lot.sizeBreakdown || {}).map(([key, value]) => [String(key), Number(value) || 0])),
+      },
+      bales: (lot.bales || []).map((bale, index) => ({
+        id: bale.id || Date.now() + index,
+        baleNumber: bale.baleNumber || '',
+        meters: Number(bale.meters) || 0,
+        weight: bale.weight || '',
+        shade: bale.shade || '',
+        remarks: bale.remarks || '',
+      })),
+      cutting: {
+        patternType: lot.cutting?.patternType || 'Marker',
+        markerLength: lot.cutting?.markerLength ?? '',
+        markerWidth: lot.cutting?.markerWidth ?? '',
+        layLength: lot.cutting?.layLength ?? '',
+        noOfLayers: lot.cutting?.noOfLayers ?? '',
+        noOfPlies: lot.cutting?.noOfPlies ?? '',
+      },
+    })
+    setErrors([])
+    setStatusMessage('')
+    setWizardOpen(true)
+    setActiveTab('newLot')
+    setMoreOpen(false)
+  }
+
+  const closeWizard = () => {
+    setWizardOpen(false)
+    setEditingId(null)
+    setErrors([])
   }
 
   const goTo = (id) => {
@@ -292,34 +351,27 @@ function App() {
     setMoreOpen(false)
   }
 
-  const nextStep = () => {
-    setErrors([])
-    setWizardStep((current) => Math.min(current + 1, 5))
-  }
-
-  const previousStep = () => {
-    setErrors([])
-    setWizardStep((current) => Math.max(current - 1, 0))
-  }
-
   const saveLot = async () => {
     const payload = {
       ...lotForm,
-      lotNumber: lotForm.lotNumber.trim(),
+      lotNumber: (lotForm.lotNumber || '').trim(),
       averageConsumption: Number((Number(lotForm.totalMeters || 0) / (Number(sizeTotal || 1) || 1)).toFixed(2)),
       totalPieces: sizeTotal,
-      status: 'Ready',
       bales: lotForm.bales,
       cutting: { ...lotForm.cutting },
       sizeBreakdown: { ...lotForm.sizeBreakdown },
     }
+    if (!editingId) payload.status = 'Ready'
 
     try {
-      const response = await fetch(`${API_BASE}/api/lots`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+      const response = await fetch(
+        editingId ? `${API_BASE}/api/lots/${editingId}` : `${API_BASE}/api/lots`,
+        {
+          method: editingId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        },
+      )
 
       const result = await response.json()
       if (!response.ok) {
@@ -327,12 +379,16 @@ function App() {
         return
       }
 
-      setLots((current) => [result, ...current])
+      const wasEditing = editingId
+      setLots((current) => (wasEditing
+        ? current.map((lot) => (Number(lot.id) === Number(wasEditing) ? result : lot))
+        : [result, ...current]))
       setSelectedLotId(result.id)
       setActiveTab('lots')
       setWizardOpen(false)
+      setEditingId(null)
       setErrors([])
-      setStatusMessage('Lot saved successfully.')
+      setStatusMessage(wasEditing ? t('msg.updated') : t('msg.saved'))
     } catch {
       setErrors(['Unable to connect to the server. Please start the backend.'])
     }
@@ -353,7 +409,7 @@ function App() {
 
   const printLot = async (lotId) => {
     try {
-      const response = await fetch(`${API_BASE}/api/print/${lotId}`)
+      const response = await fetch(`${API_BASE}/api/print/${lotId}?lang=${lang}`)
       if (!response.ok) throw new Error('PDF export failed')
       const blob = await response.blob()
       const objectUrl = URL.createObjectURL(blob)
@@ -366,14 +422,12 @@ function App() {
     }
   }
 
-  const steps = ['Lot Details', 'Fabric Details', 'Size Matrix', 'Bale / Roll', 'Cutting Info', 'Review']
-
   const roleSelect = (
     <>
-      <option value="Admin">Admin</option>
-      <option value="Supervisor">Supervisor</option>
-      <option value="Operator">Operator</option>
-      <option value="Viewer">Viewer</option>
+      <option value="Admin">{t('role.Admin')}</option>
+      <option value="Supervisor">{t('role.Supervisor')}</option>
+      <option value="Operator">{t('role.Operator')}</option>
+      <option value="Viewer">{t('role.Viewer')}</option>
     </>
   )
 
@@ -410,13 +464,14 @@ function App() {
                 className={`nav-button ${activeTab === item.id ? 'active' : ''}`}
                 onClick={() => goTo(item.id)}
               >
-                <span>{item.label}</span>
+                <span className="nav-ico" aria-hidden="true">{BN_ICONS[item.id]}</span>
+                <span>{t(`nav.${item.id}`)}</span>
               </button>
             ))}
           </nav>
 
           <div className="sidebar-card">
-            <label className="field-label">Role</label>
+            <label className="field-label">{t('role.label')}</label>
             <select value={role} onChange={(event) => setRole(event.target.value)}>
               {roleSelect}
             </select>
@@ -426,13 +481,13 @@ function App() {
         <main className="content-panel">
           <header className="topbar">
             <div>
-              <p className="eyebrow">Factory Workflow</p>
-              <h1>{PAGE_TITLES[activeTab]}</h1>
+              <p className="eyebrow">{t('page.eyebrow')}</p>
+              <h1>{t(`page.${activeTab}`)}</h1>
             </div>
 
             <div className="topbar-actions">
-              <button type="button" className="ghost-button" onClick={() => setActiveTab('lots')}>View Lots</button>
-              <button type="button" className="primary-button" onClick={openNewLot}>+ New Lot</button>
+              <button type="button" className="ghost-button" onClick={() => setActiveTab('lots')}>{t('btn.viewLots')}</button>
+              <button type="button" className="primary-button" onClick={openNewLot}>{t('btn.newLot')}</button>
             </div>
           </header>
 
@@ -441,50 +496,58 @@ function App() {
         {activeTab === 'dashboard' && (
           <section className="page-stack">
             <div className="summary-grid">
-              <StatCard label="Total Active Lots" value={dashboardStats.activeLots} tone="blue" />
-              <StatCard label="Today's Cutting" value={dashboardStats.todaysCutting} tone="orange" />
-              <StatCard label="Pending Cutting" value={dashboardStats.pendingCutting} tone="amber" />
-              <StatCard label="Completed Lots" value={dashboardStats.completedLots} tone="green" />
-              <StatCard label="Total Fabric Used" value={`${dashboardStats.totalFabricUsed} MTR`} tone="slate" />
-              <StatCard label="Total Pieces" value={dashboardStats.totalPieces} tone="purple" />
+              <StatCard label={t('stat.activeLots')} value={dashboardStats.activeLots} tone="blue" />
+              <StatCard label={t('stat.todaysCutting')} value={dashboardStats.todaysCutting} tone="orange" />
+              <StatCard label={t('stat.pendingCutting')} value={dashboardStats.pendingCutting} tone="amber" />
+              <StatCard label={t('stat.completedLots')} value={dashboardStats.completedLots} tone="green" />
+              <StatCard label={t('stat.totalFabric')} value={`${dashboardStats.totalFabricUsed} MTR`} tone="slate" />
+              <StatCard label={t('stat.totalPieces')} value={dashboardStats.totalPieces} tone="purple" />
             </div>
 
             <div className="panel-card">
               <div className="panel-header">
-                <h3>Today's Cutting</h3>
-                <button type="button" className="ghost-button small">Export</button>
+                <h3>{t('tbl.todaysCutting')}</h3>
+                <button type="button" className="ghost-button small">{t('btn.export')}</button>
               </div>
 
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Lot No.</th>
-                      <th>Style / Short No.</th>
-                      <th>Fabric</th>
-                      <th>Pieces</th>
-                      <th>Meter</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lots.slice(0, 5).map((lot) => (
-                      <tr key={lot.id}>
-                        <td data-label="Lot No.">{lot.lotNumber}</td>
-                        <td data-label="Style / Short No.">{lot.shortNumber}</td>
-                        <td data-label="Fabric">{lot.fabricType}</td>
-                        <td data-label="Pieces">{lot.totalPieces}</td>
-                        <td data-label="Meter">{lot.totalMeters}</td>
-                        <td data-label="Status"><StatusBadge status={lot.status} /></td>
-                        <td data-label="Action" className="cell-actions">
-                          <button type="button" className="table-action" onClick={() => { setSelectedLotId(lot.id); setActiveTab('lots') }}>Open</button>
-                        </td>
+              {lots.length === 0 ? (
+                <EmptyState
+                  title={t('empty.noLotsTitle')}
+                  message={t('empty.noLotsDash')}
+                  action={<button type="button" className="primary-button" onClick={openNewLot}>{t('btn.newLot')}</button>}
+                />
+              ) : (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{t('col.lotNo')}</th>
+                        <th>{t('col.style')}</th>
+                        <th>{t('col.fabric')}</th>
+                        <th>{t('col.pieces')}</th>
+                        <th>{t('col.meter')}</th>
+                        <th>{t('col.status')}</th>
+                        <th>{t('col.action')}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {lots.slice(0, 5).map((lot) => (
+                        <tr key={lot.id}>
+                          <td data-label={t('col.lotNo')}>{lot.lotNumber}</td>
+                          <td data-label={t('col.style')}>{lot.shortNumber}</td>
+                          <td data-label={t('col.fabric')}>{lot.fabricType}</td>
+                          <td data-label={t('col.pieces')}>{lot.totalPieces}</td>
+                          <td data-label={t('col.meter')}>{lot.totalMeters}</td>
+                          <td data-label={t('col.status')}><StatusBadge status={lot.status} label={t(`status.${lot.status}`)} /></td>
+                          <td data-label={t('col.action')} className="cell-actions">
+                            <button type="button" className="table-action" onClick={() => { setSelectedLotId(lot.id); setActiveTab('lots') }}>{t('btn.open')}</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -492,45 +555,54 @@ function App() {
         {activeTab === 'lots' && (
           <section className="page-stack">
             <div className="toolbar">
-              <input type="search" value={search} placeholder="Search lot no, short no, supplier, bale" onChange={(event) => setSearch(event.target.value)} />
+              <input type="search" value={search} placeholder={t('search.placeholder')} onChange={(event) => setSearch(event.target.value)} />
               <div className="chip-row">
-                {['All', 'Today', 'This Week', 'This Month', 'Pending', 'Cutting', 'Completed'].map((item) => (
-                  <button key={item} type="button" className={`chip ${filter === item ? 'selected' : ''}`} onClick={() => setFilter(item)}>{item}</button>
+                {[['All', 'filter.All'], ['Today', 'filter.Today'], ['This Week', 'filter.ThisWeek'], ['This Month', 'filter.ThisMonth'], ['Pending', 'filter.Pending'], ['Cutting', 'filter.Cutting'], ['Completed', 'filter.Completed']].map(([value, key]) => (
+                  <button key={value} type="button" className={`chip ${filter === value ? 'selected' : ''}`} onClick={() => setFilter(value)}>{t(key)}</button>
                 ))}
               </div>
             </div>
 
             <div className="panel-card">
+              {lotTableData.length === 0 ? (
+                <EmptyState
+                  title={lots.length === 0 ? t('empty.noLotsTitle') : t('empty.noMatchTitle')}
+                  message={lots.length === 0 ? t('empty.noLotsList') : t('empty.noMatchMsg')}
+                  action={lots.length === 0
+                    ? <button type="button" className="primary-button" onClick={openNewLot}>{t('btn.newLot')}</button>
+                    : <button type="button" className="ghost-button" onClick={() => { setSearch(''); setFilter('All') }}>{t('btn.clearSearch')}</button>}
+                />
+              ) : (
               <div className="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>Lot No.</th>
-                      <th>Short No.</th>
-                      <th>Fabric Supplier</th>
-                      <th>MTR</th>
-                      <th>PCS</th>
-                      <th>Cutting Date</th>
-                      <th>Status</th>
-                      <th>Created By</th>
-                      <th>Action</th>
+                      <th>{t('col.lotNo')}</th>
+                      <th>{t('col.shortNo')}</th>
+                      <th>{t('col.supplier')}</th>
+                      <th>{t('col.mtr')}</th>
+                      <th>{t('col.pcs')}</th>
+                      <th>{t('col.cuttingDate')}</th>
+                      <th>{t('col.status')}</th>
+                      <th>{t('col.createdBy')}</th>
+                      <th>{t('col.action')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {lotTableData.map((lot) => (
                       <tr key={lot.id}>
-                        <td data-label="Lot No.">{lot.lotNumber}</td>
-                        <td data-label="Short No.">{lot.shortNumber}</td>
-                        <td data-label="Fabric Supplier">{lot.supplier}</td>
-                        <td data-label="MTR">{lot.totalMeters}</td>
-                        <td data-label="PCS">{lot.totalPieces}</td>
-                        <td data-label="Cutting Date">{lot.cuttingDate}</td>
-                        <td data-label="Status"><StatusBadge status={lot.status} /></td>
-                        <td data-label="Created By">{lot.createdBy}</td>
-                        <td data-label="Action" className="cell-actions">
+                        <td data-label={t('col.lotNo')}>{lot.lotNumber}</td>
+                        <td data-label={t('col.shortNo')}>{lot.shortNumber}</td>
+                        <td data-label={t('col.supplier')}>{lot.supplier}</td>
+                        <td data-label={t('col.mtr')}>{lot.totalMeters}</td>
+                        <td data-label={t('col.pcs')}>{lot.totalPieces}</td>
+                        <td data-label={t('col.cuttingDate')}>{lot.cuttingDate}</td>
+                        <td data-label={t('col.status')}><StatusBadge status={lot.status} label={t(`status.${lot.status}`)} /></td>
+                        <td data-label={t('col.createdBy')}>{lot.createdBy}</td>
+                        <td data-label={t('col.action')} className="cell-actions">
                           <div className="inline-actions">
-                            <button type="button" className="table-action" onClick={() => { setSelectedLotId(lot.id); setActiveTab('dashboard') }}>Detail</button>
-                            <button type="button" className="table-action" onClick={() => printLot(lot.id)}>PDF</button>
+                            <button type="button" className="table-action" onClick={() => { setSelectedLotId(lot.id); setActiveTab('lots') }}>{t('btn.detail')}</button>
+                            <button type="button" className="table-action" onClick={() => printLot(lot.id)}>{t('btn.pdf')}</button>
                           </div>
                         </td>
                       </tr>
@@ -538,6 +610,7 @@ function App() {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           </section>
         )}
@@ -545,39 +618,39 @@ function App() {
         {activeTab === 'cutting' && (
           <section className="page-stack">
             <div className="mini-grid">
-              <MiniStat label="Waiting for Cutting" value={lots.filter((lot) => lot.status === 'Ready').length} />
-              <MiniStat label="In Cutting" value={lots.filter((lot) => lot.status === 'Cutting').length} />
-              <MiniStat label="Completed" value={lots.filter((lot) => lot.status === 'Completed').length} />
-              <MiniStat label="Planned Pieces" value={lots.reduce((sum, lot) => sum + Number(lot.totalPieces || 0), 0)} />
+              <MiniStat label={t('mini.waitingCutting')} value={lots.filter((lot) => lot.status === 'Ready').length} />
+              <MiniStat label={t('mini.inCutting')} value={lots.filter((lot) => lot.status === 'Cutting').length} />
+              <MiniStat label={t('mini.completed')} value={lots.filter((lot) => lot.status === 'Completed').length} />
+              <MiniStat label={t('mini.plannedPieces')} value={lots.reduce((sum, lot) => sum + Number(lot.totalPieces || 0), 0)} />
             </div>
 
             <div className="panel-card">
               <div className="panel-header">
-                <h3>Cutting Queue</h3>
+                <h3>{t('tbl.cuttingQueue')}</h3>
               </div>
               <div className="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>Lot</th>
-                      <th>Style</th>
-                      <th>Fabric</th>
-                      <th>Qty</th>
-                      <th>Cut Date</th>
-                      <th>Status</th>
-                      <th>Action</th>
+                      <th>{t('col.lot')}</th>
+                      <th>{t('col.shortNo')}</th>
+                      <th>{t('col.fabric')}</th>
+                      <th>{t('col.qty')}</th>
+                      <th>{t('col.cutDate')}</th>
+                      <th>{t('col.status')}</th>
+                      <th>{t('col.action')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {lots.map((lot) => (
                       <tr key={lot.id}>
-                        <td data-label="Lot">{lot.lotNumber}</td>
-                        <td data-label="Style">{lot.shortNumber}</td>
-                        <td data-label="Fabric">{lot.fabricType}</td>
-                        <td data-label="Qty">{lot.totalPieces}</td>
-                        <td data-label="Cut Date">{lot.cuttingDate}</td>
-                        <td data-label="Status"><StatusBadge status={lot.status} /></td>
-                        <td data-label="Action" className="cell-actions"><button type="button" className="table-action" onClick={() => updateStatus(lot.id, 'Cutting')}>Start</button></td>
+                        <td data-label={t('col.lot')}>{lot.lotNumber}</td>
+                        <td data-label={t('col.shortNo')}>{lot.shortNumber}</td>
+                        <td data-label={t('col.fabric')}>{lot.fabricType}</td>
+                        <td data-label={t('col.qty')}>{lot.totalPieces}</td>
+                        <td data-label={t('col.cutDate')}>{lot.cuttingDate}</td>
+                        <td data-label={t('col.status')}><StatusBadge status={lot.status} label={t(`status.${lot.status}`)} /></td>
+                        <td data-label={t('col.action')} className="cell-actions"><button type="button" className="table-action" onClick={() => updateStatus(lot.id, 'Cutting')}>{t('btn.start')}</button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -591,33 +664,27 @@ function App() {
           <section className="page-stack">
             <div className="panel-card">
               <div className="panel-header">
-                <h3>Bale / Fabric Reconciliation</h3>
+                <h3>{t('tbl.baleRecon')}</h3>
               </div>
               <div className="kpi-inline">
-                <div><span>Total Bale Count</span><strong>{selectedLot?.bales?.length || 0}</strong></div>
-                <div><span>Total Meters</span><strong>{selectedLot ? selectedLot.bales.reduce((sum, bale) => sum + Number(bale.meters || 0), 0) : 0}</strong></div>
-                <div><span>Lot MTR</span><strong>{selectedLot?.totalMeters || 0}</strong></div>
+                <div><span>{t('bale.totalCount')}</span><strong>{selectedLot?.bales?.length || 0}</strong></div>
+                <div><span>{t('bale.totalMeters')}</span><strong>{selectedLot ? selectedLot.bales.reduce((sum, bale) => sum + Number(bale.meters || 0), 0) : 0}</strong></div>
+                <div><span>{t('bale.lotMtr')}</span><strong>{selectedLot?.totalMeters || 0}</strong></div>
               </div>
 
               <div className="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>Bale No.</th>
-                      <th>Meter</th>
-                      <th>Weight</th>
-                      <th>Shade</th>
-                      <th>Remarks</th>
+                      <th>{t('f.baleNo')}</th>
+                      <th>{t('col.meter')}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {(selectedLot?.bales || []).map((bale) => (
-                      <tr key={bale.id}>
-                        <td data-label="Bale No.">{bale.baleNumber}</td>
-                        <td data-label="Meter">{bale.meters}</td>
-                        <td data-label="Weight">{bale.weight || '-'}</td>
-                        <td data-label="Shade">{bale.shade || '-'}</td>
-                        <td data-label="Remarks">{bale.remarks || '-'}</td>
+                    {(selectedLot?.bales || []).map((bale, index) => (
+                      <tr key={bale.id ?? `b${index}`}>
+                        <td data-label={t('f.baleNo')}>{bale.baleNumber}</td>
+                        <td data-label={t('col.meter')}>{bale.meters}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -630,21 +697,21 @@ function App() {
         {activeTab === 'reports' && (
           <section className="page-stack">
             <div className="mini-grid">
-              <MiniStat label="Lots Waiting" value={lots.filter((lot) => ['Draft', 'Ready'].includes(lot.status)).length} />
-              <MiniStat label="Fabric Mismatch" value={lots.filter((lot) => Number(lot.totalMeters) !== (lot.bales || []).reduce((sum, bale) => sum + Number(bale.meters || 0), 0)).length} />
-              <MiniStat label="Today's Production" value={lots.filter((lot) => lot.cuttingDate === '2026-08-29').reduce((sum, lot) => sum + Number(lot.totalPieces || 0), 0)} />
-              <MiniStat label="Highest Consumption" value="0.94 AVG" />
+              <MiniStat label={t('mini.lotsWaiting')} value={lots.filter((lot) => ['Draft', 'Ready'].includes(lot.status)).length} />
+              <MiniStat label={t('mini.fabricMismatch')} value={lots.filter((lot) => Number(lot.totalMeters) !== (lot.bales || []).reduce((sum, bale) => sum + Number(bale.meters || 0), 0)).length} />
+              <MiniStat label={t('mini.todaysProduction')} value={lots.filter((lot) => lot.cuttingDate === '2026-08-29').reduce((sum, lot) => sum + Number(lot.totalPieces || 0), 0)} />
+              <MiniStat label={t('mini.highestConsumption')} value="0.94 AVG" />
             </div>
 
             <div className="panel-card">
               <div className="panel-header">
-                <h3>Operational Summary</h3>
+                <h3>{t('tbl.opSummary')}</h3>
               </div>
               <div className="report-list">
-                <div className="report-item"><strong>Lots waiting for cutting</strong><span>{lots.filter((lot) => ['Draft', 'Ready'].includes(lot.status)).length}</span></div>
-                <div className="report-item"><strong>Fabric mismatch alerts</strong><span>{lots.filter((lot) => Number(lot.totalMeters) !== (lot.bales || []).reduce((sum, bale) => sum + Number(bale.meters || 0), 0)).length}</span></div>
-                <div className="report-item"><strong>Completed cutting</strong><span>{lots.filter((lot) => lot.status === 'Completed').length}</span></div>
-                <div className="report-item"><strong>Pending cutting</strong><span>{lots.filter((lot) => lot.status === 'Ready').length}</span></div>
+                <div className="report-item"><strong>{t('rep.lotsWaiting')}</strong><span>{lots.filter((lot) => ['Draft', 'Ready'].includes(lot.status)).length}</span></div>
+                <div className="report-item"><strong>{t('rep.mismatchAlerts')}</strong><span>{lots.filter((lot) => Number(lot.totalMeters) !== (lot.bales || []).reduce((sum, bale) => sum + Number(bale.meters || 0), 0)).length}</span></div>
+                <div className="report-item"><strong>{t('rep.completedCutting')}</strong><span>{lots.filter((lot) => lot.status === 'Completed').length}</span></div>
+                <div className="report-item"><strong>{t('rep.pendingCutting')}</strong><span>{lots.filter((lot) => lot.status === 'Ready').length}</span></div>
               </div>
             </div>
           </section>
@@ -654,9 +721,22 @@ function App() {
           <section className="page-stack">
             <div className="settings-grid">
               <div className="panel-card">
-                <h3>Calculation Rules</h3>
+                <h3>{t('set.language')}</h3>
                 <div className="settings-row">
-                  <label>Average consumption formula</label>
+                  <label>{t('set.language')}</label>
+                  <select value={lang} onChange={(event) => setLang(event.target.value)}>
+                    {LANGUAGES.map((option) => (
+                      <option key={option.code} value={option.code}>{option.label}</option>
+                    ))}
+                  </select>
+                  <small className="field-hint">{t('set.languageHint')}</small>
+                </div>
+              </div>
+
+              <div className="panel-card">
+                <h3>{t('set.calcRules')}</h3>
+                <div className="settings-row">
+                  <label>{t('set.avgFormula')}</label>
                   <select defaultValue="Total Fabric Meters ÷ Total Pieces">
                     <option>Total Fabric Meters ÷ Total Pieces</option>
                     <option>Total Fabric Meters ÷ Total Panels</option>
@@ -664,18 +744,18 @@ function App() {
                   </select>
                 </div>
                 <div className="settings-row">
-                  <label>Lot number auto-generation</label>
+                  <label>{t('set.autoNumber')}</label>
                   <input type="checkbox" defaultChecked />
                 </div>
               </div>
 
               <div className="panel-card">
-                <h3>Role Setup</h3>
+                <h3>{t('set.roleSetup')}</h3>
                 <ul className="role-list">
-                  <li><strong>Admin</strong> — Full access</li>
-                  <li><strong>Supervisor</strong> — Create, edit, complete</li>
-                  <li><strong>Operator</strong> — Create and edit assigned lots</li>
-                  <li><strong>Viewer</strong> — View and reports</li>
+                  <li>{t('set.roleAdmin')}</li>
+                  <li>{t('set.roleSupervisor')}</li>
+                  <li>{t('set.roleOperator')}</li>
+                  <li>{t('set.roleViewer')}</li>
                 </ul>
               </div>
             </div>
@@ -687,180 +767,150 @@ function App() {
             <div className="wizard-panel">
               <div className="wizard-header">
                 <div>
-                  <p className="eyebrow">New lot</p>
-                  <h2>Create lot</h2>
+                  <p className="eyebrow">{editingId ? t('wiz.editLotEyebrow') : t('wiz.newLotEyebrow')}</p>
+                  <h2>{editingId ? (lotForm.lotNumber || t('wiz.editLot')) : t('wiz.createLot')}</h2>
                 </div>
-                <button type="button" className="close-button" onClick={() => setWizardOpen(false)} aria-label="Close">×</button>
+                <button type="button" className="close-button" onClick={closeWizard} aria-label="Close">×</button>
               </div>
 
               <div className="wizard-scroll">
-              <div className="stepper">
-                {steps.map((step, index) => (
-                  <div key={step} className={`step ${wizardStep === index ? 'active' : ''} ${index < wizardStep ? 'done' : ''}`}>
-                    <span>{index < wizardStep ? '✓' : index + 1}</span>
-                    <small>{step}</small>
+                {errors.length > 0 && (
+                  <div className="error-box">
+                    {errors.map((error, i) => <div key={i}>⚠ {error}</div>)}
                   </div>
-                ))}
-              </div>
+                )}
 
-              {errors.length > 0 && (
-                <div className="error-box">
-                  {errors.map((error) => <div key={error}>⚠ {error}</div>)}
-                </div>
-              )}
-
-              {wizardStep === 0 && (
-                <div className="wizard-grid">
-                  <div className="field-group">
-                    <label className="field-label">Lot No.</label>
-                    <div className="inline-field">
-                      <input value={lotForm.lotNumber} onChange={(event) => updateLotField('lotNumber', event.target.value)} placeholder="LOT-30" />
-                      <button type="button" className="ghost-button small" onClick={generateLotNumber}>Auto</button>
+                <section className="form-section">
+                  <h3>{t('sec.lot')}</h3>
+                  <p className="section-hint">{t('hint.lot')}</p>
+                  <div className="wizard-grid">
+                    <div className="field-group">
+                      <label className="field-label">{t('f.lotNo')}</label>
+                      <div className="inline-field">
+                        <input value={lotForm.lotNumber} onChange={(event) => updateLotField('lotNumber', event.target.value)} placeholder="LOT-30" />
+                        <button type="button" className="ghost-button small" onClick={generateLotNumber}>{t('btn.auto')}</button>
+                      </div>
+                    </div>
+                    <div className="field-group">
+                      <label className="field-label">{t('f.date')}</label>
+                      <input type="date" value={lotForm.date} onChange={(event) => updateLotField('date', event.target.value)} />
+                    </div>
+                    <div className="field-group">
+                      <label className="field-label">{t('f.supplier')}</label>
+                      <input list="supplier-list" value={lotForm.supplier} onChange={(event) => updateLotField('supplier', event.target.value)} />
+                      <datalist id="supplier-list">
+                        {suppliers.map((supplier) => <option key={supplier} value={supplier} />)}
+                      </datalist>
+                    </div>
+                    <div className="field-group">
+                      <label className="field-label">{t('f.shortNo')}</label>
+                      <input value={lotForm.shortNumber} onChange={(event) => updateLotField('shortNumber', event.target.value)} />
+                    </div>
+                    <div className="field-group">
+                      <label className="field-label">{t('f.shortName')}</label>
+                      <input value={lotForm.shortName} onChange={(event) => updateLotField('shortName', event.target.value)} />
+                    </div>
+                    <div className="field-group">
+                      <label className="field-label">{t('f.programDate')}</label>
+                      <input type="date" value={lotForm.programDate} onChange={(event) => updateLotField('programDate', event.target.value)} />
+                    </div>
+                    <div className="field-group">
+                      <label className="field-label">{t('f.cuttingDate')}</label>
+                      <input type="date" value={lotForm.cuttingDate} onChange={(event) => updateLotField('cuttingDate', event.target.value)} />
                     </div>
                   </div>
-                  <div className="field-group">
-                    <label className="field-label">Date</label>
-                    <input type="date" value={lotForm.date} onChange={(event) => updateLotField('date', event.target.value)} />
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">Fabric Supplier</label>
-                    <input list="supplier-list" value={lotForm.supplier} onChange={(event) => updateLotField('supplier', event.target.value)} />
-                    <datalist id="supplier-list">
-                      {suppliers.map((supplier) => <option key={supplier} value={supplier} />)}
-                    </datalist>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">Short No.</label>
-                    <input value={lotForm.shortNumber} onChange={(event) => updateLotField('shortNumber', event.target.value)} />
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">Program Date</label>
-                    <input type="date" value={lotForm.programDate} onChange={(event) => updateLotField('programDate', event.target.value)} />
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">Cutting Date</label>
-                    <input type="date" value={lotForm.cuttingDate} onChange={(event) => updateLotField('cuttingDate', event.target.value)} />
-                  </div>
-                </div>
-              )}
+                </section>
 
-              {wizardStep === 1 && (
-                <div className="wizard-grid">
-                  <div className="field-group">
-                    <label className="field-label">Fabric Supplier</label>
-                    <input value={lotForm.supplier} onChange={(event) => updateLotField('supplier', event.target.value)} />
+                <section className="form-section">
+                  <h3>{t('sec.fabric')}</h3>
+                  <p className="section-hint">{t('hint.fabric')}</p>
+                  <div className="wizard-grid">
+                    <div className="field-group">
+                      <label className="field-label">{t('f.fabricType')}</label>
+                      <input value={lotForm.fabricType} onChange={(event) => updateLotField('fabricType', event.target.value)} />
+                    </div>
+                    <div className="field-group">
+                      <label className="field-label">{t('f.color')}</label>
+                      <input value={lotForm.color} onChange={(event) => updateLotField('color', event.target.value)} />
+                    </div>
+                    <div className="field-group full-width">
+                      <label className="field-label">{t('f.fabricDesc')}</label>
+                      <textarea value={lotForm.description} onChange={(event) => updateLotField('description', event.target.value)} rows="3" />
+                    </div>
+                    <div className="field-group"><label className="field-label">{t('f.pana')}</label><input type="number" inputMode="numeric" value={lotForm.pana} onChange={(event) => updateLotField('pana', Number(event.target.value || 0))} /><small className="field-hint">{t('fh.pana')}</small></div>
+                    <div className="field-group"><label className="field-label">{t('f.mtr')}</label><input type="number" inputMode="decimal" value={lotForm.totalMeters} onChange={(event) => updateLotField('totalMeters', Number(event.target.value || 0))} /><small className="field-hint">{t('fh.mtr')}</small></div>
+                    <div className="field-group"><label className="field-label">{t('f.average')}</label><input type="number" value={averageValue.toFixed(2)} readOnly /><small className="field-hint">{t('fh.avg')}</small></div>
+                    <div className="field-group"><label className="field-label">{t('f.pcs')}</label><input type="number" value={sizeTotal} readOnly /><small className="field-hint">{t('fh.pcs')}</small></div>
                   </div>
-                  <div className="field-group">
-                    <label className="field-label">Short No.</label>
-                    <input value={lotForm.shortNumber} onChange={(event) => updateLotField('shortNumber', event.target.value)} />
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">Fabric Type</label>
-                    <input value={lotForm.fabricType} onChange={(event) => updateLotField('fabricType', event.target.value)} />
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">Color</label>
-                    <input value={lotForm.color} onChange={(event) => updateLotField('color', event.target.value)} />
-                  </div>
-                  <div className="field-group full-width">
-                    <label className="field-label">Fabric Description</label>
-                    <textarea value={lotForm.description} onChange={(event) => updateLotField('description', event.target.value)} rows="3" />
-                  </div>
-                  <div className="field-group"><label className="field-label">PANA</label><input type="number" value={lotForm.pana} onChange={(event) => updateLotField('pana', Number(event.target.value || 0))} /></div>
-                  <div className="field-group"><label className="field-label">MTR</label><input type="number" value={lotForm.totalMeters} onChange={(event) => updateLotField('totalMeters', Number(event.target.value || 0))} /></div>
-                  <div className="field-group"><label className="field-label">AVERAGE</label><input type="number" value={averageValue.toFixed(2)} readOnly /></div>
-                  <div className="field-group"><label className="field-label">PCS</label><input type="number" value={sizeTotal} readOnly /></div>
-                </div>
-              )}
+                </section>
 
-              {wizardStep === 2 && (
-                <div className="wizard-grid matrix-grid">
+                <section className="form-section">
+                  <h3>{t('sec.sizes')}</h3>
+                  <p className="section-hint">{t('hint.sizes')}</p>
                   <div className="matrix-toolbar">
-                    <button type="button" className="ghost-button small" onClick={() => setLotForm((current) => ({ ...current, sizeBreakdown: Object.fromEntries(SIZE_OPTIONS.map((size) => [String(size), 36])) }))}>Bulk Fill 36</button>
-                    <button type="button" className="ghost-button small" onClick={() => setLotForm((current) => ({ ...current, sizeBreakdown: createEmptySizeBreakdown() }))}>Clear All</button>
+                    <button type="button" className="ghost-button small" onClick={() => setLotForm((current) => ({ ...current, sizeBreakdown: Object.fromEntries(SIZE_OPTIONS.map((size) => [String(size), 36])) }))}>{t('btn.bulkFill')}</button>
+                    <button type="button" className="ghost-button small" onClick={() => setLotForm((current) => ({ ...current, sizeBreakdown: createEmptySizeBreakdown() }))}>{t('btn.clearAll')}</button>
                   </div>
-
                   <div className="size-matrix">
                     {SIZE_OPTIONS.map((size) => (
                       <div className="size-row" key={size}>
                         <label>{size}</label>
-                        <input type="number" min="0" value={lotForm.sizeBreakdown[String(size)] || 0} onChange={(event) => updateSize(size, event.target.value)} />
+                        <input type="number" inputMode="numeric" min="0" value={lotForm.sizeBreakdown[String(size)] || 0} onChange={(event) => updateSize(size, event.target.value)} />
                       </div>
                     ))}
                   </div>
-
                   <div className="totals-box">
-                    <div><span>Total PCS</span><strong>{sizeTotal}</strong></div>
-                    <div><span>Average</span><strong>{averageValue.toFixed(2)}</strong></div>
+                    <div><span>{t('tot.totalPcs')}</span><strong>{sizeTotal}</strong></div>
+                    <div><span>{t('tot.average')}</span><strong>{averageValue.toFixed(2)}</strong></div>
                   </div>
-                </div>
-              )}
+                </section>
 
-              {wizardStep === 3 && (
-                <div className="wizard-stack">
-                  <div className="inline-actions top-gap"><button type="button" className="primary-button small" onClick={addBale}>+ Add Bale / Roll</button></div>
-
-                  {(lotForm.bales || []).map((bale, index) => (
-                    <div className="bale-row" key={bale.id}>
-                      <div className="field-group"><label className="field-label">Bale / Roll No.</label><input value={bale.baleNumber} onChange={(event) => updateBale(bale.id, 'baleNumber', event.target.value)} placeholder={`Bale ${index + 1}`} /></div>
-                      <div className="field-group"><label className="field-label">MTR</label><input type="number" value={bale.meters} onChange={(event) => updateBale(bale.id, 'meters', event.target.value)} /></div>
-                      <div className="field-group"><label className="field-label">Weight</label><input value={bale.weight || ''} onChange={(event) => updateBale(bale.id, 'weight', event.target.value)} placeholder="Optional" /></div>
-                      <div className="field-group"><label className="field-label">Shade</label><input value={bale.shade || ''} onChange={(event) => updateBale(bale.id, 'shade', event.target.value)} placeholder="Optional" /></div>
-                      <div className="field-group"><label className="field-label">Remarks</label><input value={bale.remarks || ''} onChange={(event) => updateBale(bale.id, 'remarks', event.target.value)} placeholder="Optional" /></div>
-                      <button type="button" className="danger-button" onClick={() => removeBale(bale.id)}>Remove</button>
-                    </div>
-                  ))}
-
+                <section className="form-section">
+                  <h3>{t('sec.bale')}</h3>
+                  <p className="section-hint">{t('hint.bale')}</p>
+                  <div className="inline-actions top-gap"><button type="button" className="primary-button small" onClick={addBale}>{t('btn.addBale')}</button></div>
+                  <div className="bale-list">
+                    {(lotForm.bales || []).map((bale, index) => (
+                      <div className="bale-row" key={bale.id ?? `b${index}`}>
+                        <div className="field-group"><label className="field-label">{t('f.baleNo')}</label><input value={bale.baleNumber} onChange={(event) => updateBale(bale.id, 'baleNumber', event.target.value)} placeholder={`${index + 1}`} /></div>
+                        <div className="field-group"><label className="field-label">{t('f.mtr')}</label><input type="number" inputMode="numeric" value={bale.meters} onChange={(event) => updateBale(bale.id, 'meters', event.target.value)} /></div>
+                        <button type="button" className="bale-remove" onClick={() => removeBale(bale.id)} aria-label={t('btn.remove')} title={t('btn.remove')}>×</button>
+                      </div>
+                    ))}
+                  </div>
                   <div className="totals-box">
-                    <div><span>Total Bale Count</span><strong>{(lotForm.bales || []).length}</strong></div>
-                    <div><span>Total Bale MTR</span><strong>{baleTotal}</strong></div>
-                    <div><span>Lot MTR</span><strong>{Number(lotForm.totalMeters || 0)}</strong></div>
+                    <div><span>{t('tot.baleCount')}</span><strong>{(lotForm.bales || []).length}</strong></div>
+                    <div><span>{t('tot.baleMtr')}</span><strong>{baleTotal}</strong></div>
+                    <div><span>{t('tot.lotMtr')}</span><strong>{Number(lotForm.totalMeters || 0)}</strong></div>
                   </div>
-                </div>
-              )}
+                </section>
 
-              {wizardStep === 4 && (
-                <div className="wizard-grid">
-                  <div className="field-group"><label className="field-label">Cutting Pattern</label><select value={lotForm.cutting.patternType} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, patternType: event.target.value })}><option value="Marker">Marker</option><option value="Manual">Manual</option><option value="Computerized">Computerized</option></select></div>
-                  <div className="field-group"><label className="field-label">Marker Length</label><input type="number" value={lotForm.cutting.markerLength} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, markerLength: event.target.value })} /></div>
-                  <div className="field-group"><label className="field-label">Marker Width</label><input type="number" value={lotForm.cutting.markerWidth} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, markerWidth: event.target.value })} /></div>
-                  <div className="field-group"><label className="field-label">Lay Length</label><input type="number" value={lotForm.cutting.layLength} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, layLength: event.target.value })} /></div>
-                  <div className="field-group"><label className="field-label">No. of Layers</label><input type="number" value={lotForm.cutting.noOfLayers} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, noOfLayers: event.target.value })} /></div>
-                  <div className="field-group"><label className="field-label">No. of Plies</label><input type="number" value={lotForm.cutting.noOfPlies} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, noOfPlies: event.target.value })} /></div>
-                  <div className="field-group full-width"><label className="field-label">Pattern image upload</label><input type="file" accept="image/*" /></div>
-                </div>
-              )}
-
-              {wizardStep === 5 && (
-                <div className="wizard-grid review-grid">
-                  <div className="review-box">
-                    <h3>{lotForm.lotNumber || 'LOT-XX'}</h3>
-                    <p><strong>Fabric:</strong> {lotForm.supplier}</p>
-                    <p><strong>Short No:</strong> {lotForm.shortNumber}</p>
-                    <p><strong>Total Fabric:</strong> {numberOrZero(lotForm.totalMeters)} MTR</p>
-                    <p><strong>Average:</strong> {averageValue.toFixed(2)}</p>
-                    <p><strong>Total Pieces:</strong> {sizeTotal}</p>
-                    <p><strong>Bales:</strong> {(lotForm.bales || []).length}</p>
+                <section className="form-section">
+                  <h3>{t('sec.cutting')}</h3>
+                  <p className="section-hint">{t('hint.cutting')}</p>
+                  <div className="wizard-grid">
+                    <div className="field-group"><label className="field-label">{t('f.cuttingPattern')}</label><select value={lotForm.cutting.patternType} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, patternType: event.target.value })}><option value="Marker">Marker</option><option value="Manual">Manual</option><option value="Computerized">Computerized</option></select></div>
+                    <div className="field-group"><label className="field-label">{t('f.markerLength')}</label><input type="number" value={lotForm.cutting.markerLength} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, markerLength: event.target.value })} /></div>
+                    <div className="field-group"><label className="field-label">{t('f.markerWidth')}</label><input type="number" value={lotForm.cutting.markerWidth} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, markerWidth: event.target.value })} /></div>
+                    <div className="field-group"><label className="field-label">{t('f.layLength')}</label><input type="number" value={lotForm.cutting.layLength} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, layLength: event.target.value })} /></div>
+                    <div className="field-group"><label className="field-label">{t('f.layers')}</label><input type="number" value={lotForm.cutting.noOfLayers} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, noOfLayers: event.target.value })} /></div>
+                    <div className="field-group"><label className="field-label">{t('f.plies')}</label><input type="number" value={lotForm.cutting.noOfPlies} onChange={(event) => updateLotField('cutting', { ...lotForm.cutting, noOfPlies: event.target.value })} /></div>
+                    <div className="field-group full-width"><label className="field-label">{t('f.patternImage')}</label><input type="file" accept="image/*" /></div>
                   </div>
+                </section>
 
-                  <div className="review-box">
-                    <h4>Size Breakdown</h4>
-                    <div className="mini-size-list">
-                      {SIZE_OPTIONS.filter((size) => Number(lotForm.sizeBreakdown[String(size)] || 0) > 0).map((size) => (
-                        <div key={size} className="mini-size-row"><span>Size {size}</span><strong>{lotForm.sizeBreakdown[String(size)]}</strong></div>
-                      ))}
-                    </div>
+                <section className="form-section">
+                  <h3>{t('sec.notes')}</h3>
+                  <p className="section-hint">{t('hint.notes')}</p>
+                  <div className="field-group full-width">
+                    <textarea value={lotForm.notes} onChange={(event) => updateLotField('notes', event.target.value)} rows="3" placeholder="e.g. 2 set cutting required" />
                   </div>
-
-                  <div className="review-box full-width"><p className="success-label">✓ No major errors found</p></div>
-                </div>
-              )}
-
+                </section>
               </div>
 
               <div className="wizard-actions">
-                <button type="button" className="ghost-button" onClick={previousStep} disabled={wizardStep === 0}>Back</button>
-                {wizardStep < steps.length - 1 ? <button type="button" className="primary-button" onClick={nextStep}>Continue</button> : <button type="button" className="primary-button" onClick={saveLot}>Save Lot</button>}
+                <button type="button" className="ghost-button" onClick={closeWizard}>{t('btn.cancel')}</button>
+                <button type="button" className="primary-button" onClick={saveLot}>{editingId ? t('btn.updateLot') : t('btn.saveLot')}</button>
               </div>
             </div>
           </div>
@@ -869,34 +919,36 @@ function App() {
         {selectedLot && activeTab !== 'dashboard' && !wizardOpen && (
           <div className="floating-detail">
             <div className="detail-header">
-              <div><p className="eyebrow">Selected Lot</p><h3>{selectedLot.lotNumber}</h3></div>
+              <div><p className="eyebrow">{t('detail.selectedLot')}</p><h3>{selectedLot.lotNumber}</h3></div>
               <div className="detail-actions">
-                <button type="button" className="ghost-button small" onClick={() => updateStatus(selectedLot.id, 'Ready')}>Ready</button>
-                <button type="button" className="ghost-button small" onClick={() => updateStatus(selectedLot.id, 'Cutting')}>Cutting</button>
-                <button type="button" className="ghost-button small" onClick={() => updateStatus(selectedLot.id, 'Completed')}>Completed</button>
-                <button type="button" className="primary-button small" onClick={() => printLot(selectedLot.id)}>Print</button>
+                <button type="button" className="ghost-button small" onClick={() => openEditLot(selectedLot)}>{t('btn.edit')}</button>
+                <button type="button" className="ghost-button small" onClick={() => updateStatus(selectedLot.id, 'Ready')}>{t('status.Ready')}</button>
+                <button type="button" className="ghost-button small" onClick={() => updateStatus(selectedLot.id, 'Cutting')}>{t('status.Cutting')}</button>
+                <button type="button" className="ghost-button small" onClick={() => updateStatus(selectedLot.id, 'Completed')}>{t('status.Completed')}</button>
+                <button type="button" className="primary-button small" onClick={() => printLot(selectedLot.id)}>{t('btn.print')}</button>
               </div>
             </div>
 
             <div className="lot-detail-grid">
               <div className="detail-card">
-                <h4>Lot Information</h4>
-                <div className="key-value"><span>Lot No.</span><strong>{selectedLot.lotNumber}</strong></div>
-                <div className="key-value"><span>Status</span><StatusBadge status={selectedLot.status} /></div>
-                <div className="key-value"><span>Program</span><strong>{selectedLot.programDate}</strong></div>
-                <div className="key-value"><span>Cut Date</span><strong>{selectedLot.cuttingDate}</strong></div>
+                <h4>{t('detail.lotInfo')}</h4>
+                <div className="key-value"><span>{t('detail.lotNo')}</span><strong>{selectedLot.lotNumber}</strong></div>
+                <div className="key-value"><span>{t('detail.status')}</span><StatusBadge status={selectedLot.status} label={t(`status.${selectedLot.status}`)} /></div>
+                <div className="key-value"><span>{t('detail.program')}</span><strong>{selectedLot.programDate}</strong></div>
+                <div className="key-value"><span>{t('detail.cutDate')}</span><strong>{selectedLot.cuttingDate}</strong></div>
               </div>
 
               <div className="detail-card">
-                <h4>Fabric Information</h4>
-                <div className="key-value"><span>Supplier</span><strong>{selectedLot.supplier}</strong></div>
-                <div className="key-value"><span>Short No.</span><strong>{selectedLot.shortNumber}</strong></div>
-                <div className="key-value"><span>Type</span><strong>{selectedLot.fabricType}</strong></div>
-                <div className="key-value"><span>Color</span><strong>{selectedLot.color}</strong></div>
+                <h4>{t('detail.fabricInfo')}</h4>
+                <div className="key-value"><span>{t('detail.supplier')}</span><strong>{selectedLot.supplier}</strong></div>
+                <div className="key-value"><span>{t('f.shortNo')}</span><strong>{selectedLot.shortNumber}</strong></div>
+                <div className="key-value"><span>{t('f.shortName')}</span><strong>{selectedLot.shortName || '—'}</strong></div>
+                <div className="key-value"><span>{t('detail.type')}</span><strong>{selectedLot.fabricType}</strong></div>
+                <div className="key-value"><span>{t('detail.color')}</span><strong>{selectedLot.color}</strong></div>
               </div>
 
               <div className="detail-card">
-                <h4>Fabric Metrics</h4>
+                <h4>{t('detail.fabricMetrics')}</h4>
                 <div className="key-value"><span>MTR</span><strong>{selectedLot.totalMeters}</strong></div>
                 <div className="key-value"><span>PCS</span><strong>{selectedLot.totalPieces}</strong></div>
                 <div className="key-value"><span>PANA</span><strong>{selectedLot.pana}</strong></div>
@@ -904,7 +956,7 @@ function App() {
               </div>
 
               <div className="detail-card">
-                <h4>Notes</h4>
+                <h4>{t('detail.notes')}</h4>
                 <p>{selectedLot.notes}</p>
               </div>
             </div>
@@ -915,7 +967,6 @@ function App() {
 
       <nav className="bottom-nav">
         {PRIMARY_NAV.map((id) => {
-          const item = NAV_ITEMS.find((nav) => nav.id === id)
           return (
             <button
               key={id}
@@ -924,7 +975,7 @@ function App() {
               onClick={() => goTo(id)}
             >
               <span className="bn-icon">{BN_ICONS[id]}</span>
-              <span>{item.label}</span>
+              <span>{t(`nav.${id}`)}</span>
             </button>
           )
         })}
@@ -934,7 +985,7 @@ function App() {
           onClick={() => setMoreOpen(true)}
         >
           <span className="bn-icon">☰</span>
-          <span>More</span>
+          <span>{t('nav.more')}</span>
         </button>
       </nav>
 
@@ -942,19 +993,16 @@ function App() {
         <div className="more-sheet-backdrop" onClick={() => setMoreOpen(false)}>
           <div className="more-sheet" onClick={(event) => event.stopPropagation()}>
             <div className="more-grabber" />
-            {MORE_NAV.map((id) => {
-              const item = NAV_ITEMS.find((nav) => nav.id === id)
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  className={activeTab === id ? 'active' : ''}
-                  onClick={() => goTo(id)}
-                >
-                  {item.label}
-                </button>
-              )
-            })}
+            {MORE_NAV.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className={activeTab === id ? 'active' : ''}
+                onClick={() => goTo(id)}
+              >
+                {t(`nav.${id}`)}
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -971,9 +1019,9 @@ function StatCard({ label, value, tone }) {
   )
 }
 
-function StatusBadge({ status }) {
+function StatusBadge({ status, label }) {
   const className = status ? status.toLowerCase().replace(/\s+/g, '-') : 'draft'
-  return <span className={`status-badge ${className}`}>{status}</span>
+  return <span className={`status-badge ${className}`}>{label || status}</span>
 }
 
 function MiniStat({ label, value }) {
@@ -985,8 +1033,15 @@ function MiniStat({ label, value }) {
   )
 }
 
-function numberOrZero(value) {
-  return Number(value || 0)
+function EmptyState({ title, message, action }) {
+  return (
+    <div className="empty-state">
+      <div className="empty-icon" aria-hidden="true">📋</div>
+      <h4>{title}</h4>
+      <p>{message}</p>
+      {action}
+    </div>
+  )
 }
 
 export default App
