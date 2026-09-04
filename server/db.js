@@ -85,7 +85,18 @@ const SUPPLIER_SEED = ['MTLNY', 'JAYDEEP', 'SUGAM', 'RUDRA', 'AMMEF', 'KAPIL', '
 let client
 let readyPromise
 
+const isServerless = Boolean(
+  process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT,
+)
+
 async function init() {
+  if (!isRemote && isServerless) {
+    throw new Error(
+      'Database not configured. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in your ' +
+      'Netlify environment variables (Site configuration → Environment variables), then redeploy.',
+    )
+  }
+
   const { createClient } = isRemote
     ? await import('@libsql/client/web')
     : await import('@libsql/client')
