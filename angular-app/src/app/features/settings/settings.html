@@ -1,0 +1,42 @@
+<section class="page-stack">
+  <div class="settings-grid">
+    <div class="panel-card">
+      <h3>{{ 'set.language' | t }}</h3>
+      <div class="settings-row">
+        <label>{{ 'set.language' | t }}</label>
+        <select [value]="i18n.lang()" (change)="onLangChange($event)">
+          @for (option of i18n.languages; track option.code) {
+            <option [value]="option.code">{{ option.label }}</option>
+          }
+        </select>
+        <small class="field-hint">{{ 'set.languageHint' | t }}</small>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <h3>{{ 'set.calcRules' | t }}</h3>
+      <div class="settings-row">
+        <label>{{ 'set.avgFormula' | t }}</label>
+        <select>
+          <option>Total Fabric Meters ÷ Total Pieces</option>
+          <option>Total Fabric Meters ÷ Total Panels</option>
+          <option>Manual entry</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <label>{{ 'set.autoNumber' | t }}</label>
+        <input type="checkbox" checked />
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <h3>{{ 'set.roleSetup' | t }}</h3>
+      <ul class="role-list">
+        <li>{{ 'set.roleAdmin' | t }}</li>
+        <li>{{ 'set.roleSupervisor' | t }}</li>
+        <li>{{ 'set.roleOperator' | t }}</li>
+        <li>{{ 'set.roleViewer' | t }}</li>
+      </ul>
+    </div>
+  </div>
+</section>

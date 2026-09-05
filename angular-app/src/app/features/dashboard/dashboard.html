@@ -1,0 +1,54 @@
+<section class="page-stack">
+  <div class="summary-grid">
+    <app-stat-card [label]="'stat.activeLots' | t" [value]="stats().activeLots" tone="blue" />
+    <app-stat-card [label]="'stat.todaysCutting' | t" [value]="stats().todaysCutting" tone="orange" />
+    <app-stat-card [label]="'stat.pendingCutting' | t" [value]="stats().pendingCutting" tone="amber" />
+    <app-stat-card [label]="'stat.completedLots' | t" [value]="stats().completedLots" tone="green" />
+    <app-stat-card [label]="'stat.totalFabric' | t" [value]="stats().totalFabricUsed + ' MTR'" tone="slate" />
+    <app-stat-card [label]="'stat.totalPieces' | t" [value]="stats().totalPieces" tone="purple" />
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header">
+      <h3>{{ 'tbl.todaysCutting' | t }}</h3>
+      <button type="button" class="ghost-button small">{{ 'btn.export' | t }}</button>
+    </div>
+
+    @if (lots().length === 0) {
+      <app-empty-state [title]="'empty.noLotsTitle' | t" [message]="'empty.noLotsDash' | t">
+        <button type="button" class="primary-button" (click)="ui.openNewLot()">{{ 'btn.newLot' | t }}</button>
+      </app-empty-state>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'col.lotNo' | t }}</th>
+              <th>{{ 'col.style' | t }}</th>
+              <th>{{ 'col.fabric' | t }}</th>
+              <th>{{ 'col.pieces' | t }}</th>
+              <th>{{ 'col.meter' | t }}</th>
+              <th>{{ 'col.status' | t }}</th>
+              <th>{{ 'col.action' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lot of today5(); track lot.id) {
+              <tr>
+                <td [attr.data-label]="'col.lotNo' | t">{{ lot.lotNumber }}</td>
+                <td [attr.data-label]="'col.style' | t">{{ lot.shortNumber }}</td>
+                <td [attr.data-label]="'col.fabric' | t">{{ lot.fabricType }}</td>
+                <td [attr.data-label]="'col.pieces' | t">{{ lot.totalPieces }}</td>
+                <td [attr.data-label]="'col.meter' | t">{{ lot.totalMeters }}</td>
+                <td [attr.data-label]="'col.status' | t"><app-status-badge [status]="lot.status" /></td>
+                <td [attr.data-label]="'col.action' | t" class="cell-actions">
+                  <button type="button" class="table-action" (click)="open(lot.id)">{{ 'btn.open' | t }}</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

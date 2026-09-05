@@ -1,0 +1,44 @@
+<section class="page-stack">
+  <div class="mini-grid">
+    <app-mini-stat [label]="'mini.waitingCutting' | t" [value]="waiting()" />
+    <app-mini-stat [label]="'mini.inCutting' | t" [value]="inCutting()" />
+    <app-mini-stat [label]="'mini.completed' | t" [value]="completed()" />
+    <app-mini-stat [label]="'mini.plannedPieces' | t" [value]="plannedPieces()" />
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header">
+      <h3>{{ 'tbl.cuttingQueue' | t }}</h3>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'col.lot' | t }}</th>
+            <th>{{ 'col.shortNo' | t }}</th>
+            <th>{{ 'col.fabric' | t }}</th>
+            <th>{{ 'col.qty' | t }}</th>
+            <th>{{ 'col.cutDate' | t }}</th>
+            <th>{{ 'col.status' | t }}</th>
+            <th>{{ 'col.action' | t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (lot of lots(); track lot.id) {
+            <tr>
+              <td [attr.data-label]="'col.lot' | t">{{ lot.lotNumber }}</td>
+              <td [attr.data-label]="'col.shortNo' | t">{{ lot.shortNumber }}</td>
+              <td [attr.data-label]="'col.fabric' | t">{{ lot.fabricType }}</td>
+              <td [attr.data-label]="'col.qty' | t">{{ lot.totalPieces }}</td>
+              <td [attr.data-label]="'col.cutDate' | t">{{ lot.cuttingDate }}</td>
+              <td [attr.data-label]="'col.status' | t"><app-status-badge [status]="lot.status" /></td>
+              <td [attr.data-label]="'col.action' | t" class="cell-actions">
+                <button type="button" class="table-action" (click)="start(lot.id)">{{ 'btn.start' | t }}</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

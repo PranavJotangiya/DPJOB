@@ -1,0 +1,50 @@
+@if (visible()) {
+  <div class="floating-detail">
+    <div class="detail-header">
+      <div>
+        <p class="eyebrow">{{ 'detail.selectedLot' | t }}</p>
+        <h3>{{ lot()!.lotNumber }}</h3>
+      </div>
+      <div class="detail-actions">
+        <button type="button" class="ghost-button small" (click)="edit()">{{ 'btn.edit' | t }}</button>
+        <button type="button" class="ghost-button small" (click)="setStatus('Ready')">{{ 'status.Ready' | t }}</button>
+        <button type="button" class="ghost-button small" (click)="setStatus('Cutting')">{{ 'status.Cutting' | t }}</button>
+        <button type="button" class="ghost-button small" (click)="setStatus('Completed')">{{ 'status.Completed' | t }}</button>
+        <button type="button" class="danger-button small" (click)="remove()">{{ 'btn.delete' | t }}</button>
+        <button type="button" class="primary-button small" (click)="print()">{{ 'btn.print' | t }}</button>
+      </div>
+    </div>
+
+    <div class="lot-detail-grid">
+      <div class="detail-card">
+        <h4>{{ 'detail.lotInfo' | t }}</h4>
+        <div class="key-value"><span>{{ 'detail.lotNo' | t }}</span><strong>{{ lot()!.lotNumber }}</strong></div>
+        <div class="key-value"><span>{{ 'detail.status' | t }}</span><app-status-badge [status]="lot()!.status" /></div>
+        <div class="key-value"><span>{{ 'detail.program' | t }}</span><strong>{{ lot()!.programDate }}</strong></div>
+        <div class="key-value"><span>{{ 'detail.cutDate' | t }}</span><strong>{{ lot()!.cuttingDate }}</strong></div>
+      </div>
+
+      <div class="detail-card">
+        <h4>{{ 'detail.fabricInfo' | t }}</h4>
+        <div class="key-value"><span>{{ 'detail.supplier' | t }}</span><strong>{{ lot()!.supplier }}</strong></div>
+        <div class="key-value"><span>{{ 'f.shortNo' | t }}</span><strong>{{ lot()!.shortNumber }}</strong></div>
+        <div class="key-value"><span>{{ 'f.shortName' | t }}</span><strong>{{ lot()!.shortName || '—' }}</strong></div>
+        <div class="key-value"><span>{{ 'detail.type' | t }}</span><strong>{{ lot()!.fabricType }}</strong></div>
+        <div class="key-value"><span>{{ 'detail.color' | t }}</span><strong>{{ lot()!.color }}</strong></div>
+      </div>
+
+      <div class="detail-card">
+        <h4>{{ 'detail.fabricMetrics' | t }}</h4>
+        <div class="key-value"><span>MTR</span><strong>{{ lot()!.totalMeters }}</strong></div>
+        <div class="key-value"><span>PCS</span><strong>{{ lot()!.totalPieces }}</strong></div>
+        <div class="key-value"><span>PANA</span><strong>{{ lot()!.pana }}</strong></div>
+        <div class="key-value"><span>AVG</span><strong>{{ lot()!.averageConsumption }}</strong></div>
+      </div>
+
+      <div class="detail-card">
+        <h4>{{ 'detail.notes' | t }}</h4>
+        <p>{{ lot()!.notes }}</p>
+      </div>
+    </div>
+  </div>
+}

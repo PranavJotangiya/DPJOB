@@ -1,0 +1,112 @@
+<div class="app-shell">
+  <header class="mobile-header">
+    <div class="brand-block">
+      <div class="brand-mark">DP</div>
+      <div>
+        <h2>DP Creation</h2>
+        <small>Garment Cutting</small>
+      </div>
+    </div>
+    <select class="mobile-role" [value]="ui.role()" (change)="onRoleChange($event)" aria-label="Active role">
+      @for (r of roles; track r) {
+        <option [value]="r">{{ 'role.' + r | t }}</option>
+      }
+    </select>
+  </header>
+
+  <div class="app-body">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-mark">DP</div>
+        <div>
+          <h2>DP Creation</h2>
+          <small>Garment Cutting</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        @for (item of navItems; track item.id) {
+          @if (item.route) {
+            <a class="nav-button" [routerLink]="item.route" routerLinkActive="active">
+              <span class="nav-ico" aria-hidden="true">{{ icons[item.id] }}</span>
+              <span>{{ 'nav.' + item.id | t }}</span>
+            </a>
+          } @else {
+            <button type="button" class="nav-button" (click)="goToNav(item.id)">
+              <span class="nav-ico" aria-hidden="true">{{ icons[item.id] }}</span>
+              <span>{{ 'nav.' + item.id | t }}</span>
+            </button>
+          }
+        }
+      </nav>
+
+      <div class="sidebar-card">
+        <label class="field-label">{{ 'role.label' | t }}</label>
+        <select [value]="ui.role()" (change)="onRoleChange($event)">
+          @for (r of roles; track r) {
+            <option [value]="r">{{ 'role.' + r | t }}</option>
+          }
+        </select>
+      </div>
+    </aside>
+
+    <main class="content-panel">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">{{ 'page.eyebrow' | t }}</p>
+          <h1>{{ 'page.' + ui.currentSection() | t }}</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <a class="ghost-button" routerLink="/lots">{{ 'btn.viewLots' | t }}</a>
+          <button type="button" class="primary-button" (click)="ui.openNewLot()">{{ 'btn.newLot' | t }}</button>
+        </div>
+      </header>
+
+      @if (ui.statusMessage()) {
+        <div class="success-banner">{{ ui.statusMessage() }}</div>
+      }
+
+      <router-outlet />
+
+      <app-lot-detail-panel />
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    @for (item of primaryNav; track item.id) {
+      @if (item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active" [class.cta]="item.id === 'newLot'">
+          <span class="bn-icon">{{ icons[item.id] }}</span>
+          <span>{{ 'nav.' + item.id | t }}</span>
+        </a>
+      } @else {
+        <button type="button" class="cta" (click)="goToNav(item.id)">
+          <span class="bn-icon">{{ icons[item.id] }}</span>
+          <span>{{ 'nav.' + item.id | t }}</span>
+        </button>
+      }
+    }
+    <button type="button" [class.active]="ui.moreOpen()" (click)="ui.moreOpen.set(true)">
+      <span class="bn-icon">☰</span>
+      <span>{{ 'nav.more' | t }}</span>
+    </button>
+  </nav>
+
+  @if (ui.moreOpen()) {
+    <div class="more-sheet-backdrop" (click)="ui.moreOpen.set(false)">
+      <div class="more-sheet" (click)="$event.stopPropagation()">
+        <div class="more-grabber"></div>
+        @for (item of moreNav; track item.id) {
+          <a [routerLink]="item.route" routerLinkActive="active" (click)="ui.moreOpen.set(false)">
+            {{ 'nav.' + item.id | t }}
+          </a>
+        }
+      </div>
+    </div>
+  }
+
+  @if (ui.wizardOpen()) {
+    <app-lot-form />
+  }
+</div>

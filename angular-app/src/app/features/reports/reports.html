@@ -1,0 +1,20 @@
+<section class="page-stack">
+  <div class="mini-grid">
+    <app-mini-stat [label]="'mini.lotsWaiting' | t" [value]="lotsWaiting()" />
+    <app-mini-stat [label]="'mini.fabricMismatch' | t" [value]="fabricMismatch()" />
+    <app-mini-stat [label]="'mini.todaysProduction' | t" [value]="todaysProduction()" />
+    <app-mini-stat [label]="'mini.highestConsumption' | t" value="0.94 AVG" />
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header">
+      <h3>{{ 'tbl.opSummary' | t }}</h3>
+    </div>
+    <div class="report-list">
+      <div class="report-item"><strong>{{ 'rep.lotsWaiting' | t }}</strong><span>{{ lotsWaiting() }}</span></div>
+      <div class="report-item"><strong>{{ 'rep.mismatchAlerts' | t }}</strong><span>{{ fabricMismatch() }}</span></div>
+      <div class="report-item"><strong>{{ 'rep.completedCutting' | t }}</strong><span>{{ completedCutting() }}</span></div>
+      <div class="report-item"><strong>{{ 'rep.pendingCutting' | t }}</strong><span>{{ pendingCutting() }}</span></div>
+    </div>
+  </div>
+</section>

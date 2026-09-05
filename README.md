@@ -1,16 +1,37 @@
-# React + Vite
+# DP Creation — Garment Cutting Management
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Angular + Firebase app for garment factory fabric-lot / cutting management.
 
-Currently, two official plugins are available:
+- **App code:** [`angular-app/`](angular-app) — standalone Angular components, organized by feature under `src/app/features/`.
+- **Data:** Firebase Firestore, accessed directly from the Angular app (no backend server).
+- **Hosting:** Firebase Hosting, configured by the root [`firebase.json`](firebase.json).
+- **PDF export:** generated client-side in the browser (jsPDF), including Hindi/Gujarati fonts.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Local development
 
-## React Compiler
+```bash
+cd angular-app
+npm install
+npm start          # ng serve, http://localhost:4200
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Fill in your Firebase project's web config in
+[`angular-app/src/app/core/firebase.config.ts`](angular-app/src/app/core/firebase.config.ts)
+before running — the app talks straight to Firestore.
 
-## Expanding the Oxlint configuration
+## Deploy
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+cd angular-app && npm run build && cd ..
+firebase deploy --only hosting,firestore:rules
+```
+
+## Structure
+
+```
+angular-app/src/app/
+  core/       Firebase init, i18n (en/hi/gu), Firestore + PDF services, shared models
+  shared/     small reusable UI pieces (status badge, empty state, stat cards)
+  layout/     app shell (sidebar / mobile nav / topbar)
+  features/   one folder per screen (dashboard, lots, cutting, bale, reports, settings, lot-form)
+```

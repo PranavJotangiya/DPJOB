@@ -1,0 +1,31 @@
+<section class="page-stack">
+  <div class="panel-card">
+    <div class="panel-header">
+      <h3>{{ 'tbl.baleRecon' | t }}</h3>
+    </div>
+    <div class="kpi-inline">
+      <div><span>{{ 'bale.totalCount' | t }}</span><strong>{{ selectedLot()?.bales?.length || 0 }}</strong></div>
+      <div><span>{{ 'bale.totalMeters' | t }}</span><strong>{{ totalMeters() }}</strong></div>
+      <div><span>{{ 'bale.lotMtr' | t }}</span><strong>{{ selectedLot()?.totalMeters || 0 }}</strong></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'f.baleNo' | t }}</th>
+            <th>{{ 'col.meter' | t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (bale of selectedLot()?.bales || []; track bale.id) {
+            <tr>
+              <td [attr.data-label]="'f.baleNo' | t">{{ bale.baleNumber }}</td>
+              <td [attr.data-label]="'col.meter' | t">{{ bale.meters }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

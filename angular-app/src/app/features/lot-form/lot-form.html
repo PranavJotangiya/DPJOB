@@ -1,0 +1,210 @@
+<div class="modal-backdrop">
+  <div class="wizard-panel">
+    <div class="wizard-header">
+      <div>
+        <p class="eyebrow">{{ (isEditing ? 'wiz.editLotEyebrow' : 'wiz.newLotEyebrow') | t }}</p>
+        <h2>{{ isEditing ? (form().lotNumber || ('wiz.editLot' | t)) : ('wiz.createLot' | t) }}</h2>
+      </div>
+      <button type="button" class="close-button" (click)="close()" aria-label="Close">×</button>
+    </div>
+
+    <div class="wizard-scroll">
+      @if (errors().length > 0) {
+        <div class="error-box">
+          @for (error of errors(); track error) {
+            <div>⚠ {{ error }}</div>
+          }
+        </div>
+      }
+
+      <section class="form-section">
+        <h3>{{ 'sec.lot' | t }}</h3>
+        <p class="section-hint">{{ 'hint.lot' | t }}</p>
+        <div class="wizard-grid">
+          <div class="field-group">
+            <label class="field-label">{{ 'f.lotNo' | t }}</label>
+            <div class="inline-field">
+              <input [ngModel]="form().lotNumber" (ngModelChange)="updateField('lotNumber', $event)" placeholder="LOT-30" />
+              <button type="button" class="ghost-button small" (click)="generateLotNumber()">{{ 'btn.auto' | t }}</button>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.date' | t }}</label>
+            <input type="date" [ngModel]="form().date" (ngModelChange)="updateField('date', $event)" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.supplier' | t }}</label>
+            <input list="supplier-list" [ngModel]="form().supplier" (ngModelChange)="updateField('supplier', $event)" />
+            <datalist id="supplier-list">
+              @for (s of suppliers(); track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </datalist>
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.shortNo' | t }}</label>
+            <input [ngModel]="form().shortNumber" (ngModelChange)="updateField('shortNumber', $event)" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.shortName' | t }}</label>
+            <input [ngModel]="form().shortName" (ngModelChange)="updateField('shortName', $event)" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.programDate' | t }}</label>
+            <input type="date" [ngModel]="form().programDate" (ngModelChange)="updateField('programDate', $event)" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.cuttingDate' | t }}</label>
+            <input type="date" [ngModel]="form().cuttingDate" (ngModelChange)="updateField('cuttingDate', $event)" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>{{ 'sec.fabric' | t }}</h3>
+        <p class="section-hint">{{ 'hint.fabric' | t }}</p>
+        <div class="wizard-grid">
+          <div class="field-group">
+            <label class="field-label">{{ 'f.fabricType' | t }}</label>
+            <input [ngModel]="form().fabricType" (ngModelChange)="updateField('fabricType', $event)" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.color' | t }}</label>
+            <input [ngModel]="form().color" (ngModelChange)="updateField('color', $event)" />
+          </div>
+          <div class="field-group full-width">
+            <label class="field-label">{{ 'f.fabricDesc' | t }}</label>
+            <textarea rows="3" [ngModel]="form().description" (ngModelChange)="updateField('description', $event)"></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.pana' | t }}</label>
+            <input type="number" inputmode="numeric" [ngModel]="form().pana" (ngModelChange)="updateField('pana', +$event || 0)" />
+            <small class="field-hint">{{ 'fh.pana' | t }}</small>
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.mtr' | t }}</label>
+            <input type="number" inputmode="decimal" [ngModel]="form().totalMeters" (ngModelChange)="updateField('totalMeters', +$event || 0)" />
+            <small class="field-hint">{{ 'fh.mtr' | t }}</small>
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.average' | t }}</label>
+            <input type="number" [ngModel]="averageValue().toFixed(2)" readonly />
+            <small class="field-hint">{{ 'fh.avg' | t }}</small>
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.pcs' | t }}</label>
+            <input type="number" [ngModel]="sizeTotal()" readonly />
+            <small class="field-hint">{{ 'fh.pcs' | t }}</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>{{ 'sec.sizes' | t }}</h3>
+        <p class="section-hint">{{ 'hint.sizes' | t }}</p>
+        <div class="matrix-toolbar">
+          <button type="button" class="ghost-button small" (click)="bulkFill36()">{{ 'btn.bulkFill' | t }}</button>
+          <button type="button" class="ghost-button small" (click)="clearAllSizes()">{{ 'btn.clearAll' | t }}</button>
+        </div>
+        <div class="size-matrix">
+          @for (size of sizeOptions; track size) {
+            <div class="size-row">
+              <label>{{ size }}</label>
+              <input
+                type="number"
+                inputmode="numeric"
+                min="0"
+                [ngModel]="form().sizeBreakdown[size] || 0"
+                (ngModelChange)="updateSize(size, $event)"
+              />
+            </div>
+          }
+        </div>
+        <div class="totals-box">
+          <div><span>{{ 'tot.totalPcs' | t }}</span><strong>{{ sizeTotal() }}</strong></div>
+          <div><span>{{ 'tot.average' | t }}</span><strong>{{ averageValue().toFixed(2) }}</strong></div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>{{ 'sec.bale' | t }}</h3>
+        <p class="section-hint">{{ 'hint.bale' | t }}</p>
+        <div class="inline-actions top-gap">
+          <button type="button" class="primary-button small" (click)="addBale()">{{ 'btn.addBale' | t }}</button>
+        </div>
+        <div class="bale-list">
+          @for (bale of form().bales; track bale.id) {
+            <div class="bale-row">
+              <div class="field-group">
+                <label class="field-label">{{ 'f.baleNo' | t }}</label>
+                <input [ngModel]="bale.baleNumber" (ngModelChange)="updateBale(bale.id, 'baleNumber', $event)" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">{{ 'f.mtr' | t }}</label>
+                <input type="number" inputmode="numeric" [ngModel]="bale.meters" (ngModelChange)="updateBale(bale.id, 'meters', $event)" />
+              </div>
+              <button type="button" class="bale-remove" (click)="removeBale(bale.id)" [attr.aria-label]="'btn.remove' | t" [attr.title]="'btn.remove' | t">×</button>
+            </div>
+          }
+        </div>
+        <div class="totals-box">
+          <div><span>{{ 'tot.baleCount' | t }}</span><strong>{{ form().bales.length }}</strong></div>
+          <div><span>{{ 'tot.baleMtr' | t }}</span><strong>{{ baleTotal() }}</strong></div>
+          <div><span>{{ 'tot.lotMtr' | t }}</span><strong>{{ form().totalMeters || 0 }}</strong></div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>{{ 'sec.cutting' | t }}</h3>
+        <p class="section-hint">{{ 'hint.cutting' | t }}</p>
+        <div class="wizard-grid">
+          <div class="field-group">
+            <label class="field-label">{{ 'f.cuttingPattern' | t }}</label>
+            <select [ngModel]="form().cutting.patternType" (ngModelChange)="updateCutting({ patternType: $event })">
+              <option value="Marker">Marker</option>
+              <option value="Manual">Manual</option>
+              <option value="Computerized">Computerized</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.markerLength' | t }}</label>
+            <input type="number" [ngModel]="form().cutting.markerLength" (ngModelChange)="updateCutting({ markerLength: $event })" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.markerWidth' | t }}</label>
+            <input type="number" [ngModel]="form().cutting.markerWidth" (ngModelChange)="updateCutting({ markerWidth: $event })" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.layLength' | t }}</label>
+            <input type="number" [ngModel]="form().cutting.layLength" (ngModelChange)="updateCutting({ layLength: $event })" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.layers' | t }}</label>
+            <input type="number" [ngModel]="form().cutting.noOfLayers" (ngModelChange)="updateCutting({ noOfLayers: $event })" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ 'f.plies' | t }}</label>
+            <input type="number" [ngModel]="form().cutting.noOfPlies" (ngModelChange)="updateCutting({ noOfPlies: $event })" />
+          </div>
+          <div class="field-group full-width">
+            <label class="field-label">{{ 'f.patternImage' | t }}</label>
+            <input type="file" accept="image/*" />
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h3>{{ 'sec.notes' | t }}</h3>
+        <p class="section-hint">{{ 'hint.notes' | t }}</p>
+        <div class="field-group full-width">
+          <textarea rows="3" placeholder="e.g. 2 set cutting required" [ngModel]="form().notes" (ngModelChange)="updateField('notes', $event)"></textarea>
+        </div>
+      </section>
+    </div>
+
+    <div class="wizard-actions">
+      <button type="button" class="ghost-button" (click)="close()">{{ 'btn.cancel' | t }}</button>
+      <button type="button" class="primary-button" (click)="save()">{{ (isEditing ? 'btn.updateLot' : 'btn.saveLot') | t }}</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+<section class="page-stack">
+  <div class="toolbar">
+    <input
+      type="search"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+      [placeholder]="'search.placeholder' | t"
+    />
+    <div class="chip-row">
+      @for (f of filters; track f[0]) {
+        <button type="button" class="chip" [class.selected]="filter() === f[0]" (click)="filter.set(f[0])">
+          {{ f[1] | t }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="panel-card">
+    @if (filtered().length === 0) {
+      <app-empty-state
+        [title]="(lotsService.lots().length === 0 ? 'empty.noLotsTitle' : 'empty.noMatchTitle') | t"
+        [message]="(lotsService.lots().length === 0 ? 'empty.noLotsList' : 'empty.noMatchMsg') | t"
+      >
+        @if (lotsService.lots().length === 0) {
+          <button type="button" class="primary-button" (click)="ui.openNewLot()">{{ 'btn.newLot' | t }}</button>
+        } @else {
+          <button type="button" class="ghost-button" (click)="clearSearch()">{{ 'btn.clearSearch' | t }}</button>
+        }
+      </app-empty-state>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'col.lotNo' | t }}</th>
+              <th>{{ 'col.shortNo' | t }}</th>
+              <th>{{ 'col.supplier' | t }}</th>
+              <th>{{ 'col.mtr' | t }}</th>
+              <th>{{ 'col.pcs' | t }}</th>
+              <th>{{ 'col.cuttingDate' | t }}</th>
+              <th>{{ 'col.status' | t }}</th>
+              <th>{{ 'col.createdBy' | t }}</th>
+              <th>{{ 'col.action' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lot of filtered(); track lot.id) {
+              <tr>
+                <td [attr.data-label]="'col.lotNo' | t">{{ lot.lotNumber }}</td>
+                <td [attr.data-label]="'col.shortNo' | t">{{ lot.shortNumber }}</td>
+                <td [attr.data-label]="'col.supplier' | t">{{ lot.supplier }}</td>
+                <td [attr.data-label]="'col.mtr' | t">{{ lot.totalMeters }}</td>
+                <td [attr.data-label]="'col.pcs' | t">{{ lot.totalPieces }}</td>
+                <td [attr.data-label]="'col.cuttingDate' | t">{{ lot.cuttingDate }}</td>
+                <td [attr.data-label]="'col.status' | t"><app-status-badge [status]="lot.status" /></td>
+                <td [attr.data-label]="'col.createdBy' | t">{{ lot.createdBy }}</td>
+                <td [attr.data-label]="'col.action' | t" class="cell-actions">
+                  <div class="inline-actions">
+                    <button type="button" class="table-action" (click)="openDetail(lot.id)">{{ 'btn.detail' | t }}</button>
+                    <button type="button" class="table-action" (click)="print(lot.id)">{{ 'btn.pdf' | t }}</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
