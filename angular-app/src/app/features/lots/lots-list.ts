@@ -78,4 +78,9 @@ export class LotsList implements OnInit {
     const lot = this.lotsService.lots().find((l) => l.id === id);
     if (lot) void this.pdf.printLot(lot, this.i18n.lang());
   }
+
+  share(id: string): void {
+    const lot = this.lotsService.lots().find((l) => l.id === id);
+    if (lot) void this.pdf.sharePdf(lot, this.i18n.lang());
+  }
 }

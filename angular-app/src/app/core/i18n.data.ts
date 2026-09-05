@@ -42,6 +42,7 @@ const DICT: Record<LangCode, Dict> = {
     'btn.cancel': 'Cancel',
     'btn.edit': 'Edit',
     'btn.print': 'Print',
+    'btn.share': 'Share / Download',
     'btn.auto': 'Auto',
     'btn.addBale': '+ Add Bale / Roll',
     'btn.remove': 'Remove',
@@ -54,6 +55,7 @@ const DICT: Record<LangCode, Dict> = {
     'btn.open': 'Open',
     'btn.detail': 'Detail',
     'btn.pdf': 'PDF',
+    'btn.shareShort': 'Share',
 
     'status.Draft': 'Draft',
     'status.Ready': 'Ready',
@@ -238,6 +240,7 @@ const DICT: Record<LangCode, Dict> = {
     'btn.cancel': 'रद्द करें',
     'btn.edit': 'एडिट',
     'btn.print': 'प्रिंट',
+    'btn.share': 'शेयर / डाउनलोड',
     'btn.auto': 'ऑटो',
     'btn.addBale': '+ बेल / रोल जोड़ें',
     'btn.remove': 'हटाएं',
@@ -250,6 +253,7 @@ const DICT: Record<LangCode, Dict> = {
     'btn.open': 'खोलें',
     'btn.detail': 'विवरण',
     'btn.pdf': 'PDF',
+    'btn.shareShort': 'शेयर',
 
     'status.Draft': 'ड्राफ्ट',
     'status.Ready': 'तैयार',
@@ -430,6 +434,7 @@ const DICT: Record<LangCode, Dict> = {
     'btn.cancel': 'રદ કરો',
     'btn.edit': 'એડિટ',
     'btn.print': 'પ્રિન્ટ',
+    'btn.share': 'શેર / ડાઉનલોડ',
     'btn.auto': 'ઓટો',
     'btn.addBale': '+ બેલ / રોલ ઉમેરો',
     'btn.remove': 'દૂર કરો',
@@ -442,6 +447,7 @@ const DICT: Record<LangCode, Dict> = {
     'btn.open': 'ખોલો',
     'btn.detail': 'વિગત',
     'btn.pdf': 'PDF',
+    'btn.shareShort': 'શેર',
 
     'status.Draft': 'ડ્રાફ્ટ',
     'status.Ready': 'તૈયાર',

@@ -43,6 +43,11 @@ export class LotDetailPanel {
     if (lot) void this.pdf.printLot(lot, this.i18n.lang());
   }
 
+  share(): void {
+    const lot = this.lot();
+    if (lot) void this.pdf.sharePdf(lot, this.i18n.lang());
+  }
+
   async remove(): Promise<void> {
     const lot = this.lot();
     if (!lot) return;

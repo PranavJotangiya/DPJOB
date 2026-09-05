@@ -13,6 +13,37 @@ type RGB = [number, number, number];
 @Injectable({ providedIn: 'root' })
 export class PdfService {
   async printLot(lot: Lot, lang: LangCode): Promise<void> {
+    const doc = await this.renderPdf(lot, lang);
+    const blobUrl = doc.output('bloburl');
+    const win = window.open(blobUrl as unknown as string, '_blank');
+    if (!win) window.location.href = blobUrl as unknown as string;
+  }
+
+  /**
+   * Opens the OS share sheet (WhatsApp, Drive, "Save to Files"/download, etc.)
+   * with the PDF attached as a real file. Falls back to a direct file download
+   * on desktop browsers that don't support the Web Share File API.
+   */
+  async sharePdf(lot: Lot, lang: LangCode): Promise<void> {
+    const doc = await this.renderPdf(lot, lang);
+    const fileName = `${lot.lotNumber || 'lot'}-job-card.pdf`;
+    const blob = doc.output('blob') as Blob;
+    const file = new File([blob], fileName, { type: 'application/pdf' });
+
+    const nav = navigator as Navigator & { canShare?: (data: { files: File[] }) => boolean };
+    if (nav.share && nav.canShare?.({ files: [file] })) {
+      try {
+        await nav.share({ files: [file], title: fileName });
+        return;
+      } catch (err) {
+        if ((err as Error)?.name === 'AbortError') return;
+      }
+    }
+
+    doc.save(fileName);
+  }
+
+  private async renderPdf(lot: Lot, lang: LangCode) {
     // jsPDF (and its html2canvas dependency) is sizeable — load it only when a
     // print is actually requested instead of shipping it in the main bundle.
     const { jsPDF } = await import('jspdf');
@@ -385,8 +416,6 @@ export class PdfService {
     ink(INK);
     doc.text(lot.lotNumber || '', RIGHT - 8.5, fy + 11.5, { align: 'center', maxWidth: 15 });
 
-    const blobUrl = doc.output('bloburl');
-    const win = window.open(blobUrl as unknown as string, '_blank');
-    if (!win) window.location.href = blobUrl as unknown as string;
+    return doc;
   }
 }
