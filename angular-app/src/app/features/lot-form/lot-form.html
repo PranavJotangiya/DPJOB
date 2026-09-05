@@ -34,7 +34,7 @@
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.supplier' | t }}</label>
-            <input list="supplier-list" [ngModel]="form().supplier" (ngModelChange)="updateField('supplier', $event)" />
+            <input list="supplier-list" placeholder="e.g. MTLNY" [ngModel]="form().supplier" (ngModelChange)="updateField('supplier', $event)" />
             <datalist id="supplier-list">
               @for (s of suppliers(); track s) {
                 <option [value]="s">{{ s }}</option>
@@ -43,11 +43,11 @@
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.shortNo' | t }}</label>
-            <input [ngModel]="form().shortNumber" (ngModelChange)="updateField('shortNumber', $event)" />
+            <input placeholder="e.g. RUORA-FANCY" [ngModel]="form().shortNumber" (ngModelChange)="updateField('shortNumber', $event)" />
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.shortName' | t }}</label>
-            <input [ngModel]="form().shortName" (ngModelChange)="updateField('shortName', $event)" />
+            <input placeholder="e.g. RUORA FANCY TOP" [ngModel]="form().shortName" (ngModelChange)="updateField('shortName', $event)" />
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.programDate' | t }}</label>
@@ -66,24 +66,24 @@
         <div class="wizard-grid">
           <div class="field-group">
             <label class="field-label">{{ 'f.fabricType' | t }}</label>
-            <input [ngModel]="form().fabricType" (ngModelChange)="updateField('fabricType', $event)" />
+            <input placeholder="e.g. Cotton Poplin" [ngModel]="form().fabricType" (ngModelChange)="updateField('fabricType', $event)" />
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.color' | t }}</label>
-            <input [ngModel]="form().color" (ngModelChange)="updateField('color', $event)" />
+            <input placeholder="e.g. Navy" [ngModel]="form().color" (ngModelChange)="updateField('color', $event)" />
           </div>
           <div class="field-group full-width">
             <label class="field-label">{{ 'f.fabricDesc' | t }}</label>
-            <textarea rows="3" [ngModel]="form().description" (ngModelChange)="updateField('description', $event)"></textarea>
+            <textarea rows="3" placeholder="e.g. Premium stretch twill" [ngModel]="form().description" (ngModelChange)="updateField('description', $event)"></textarea>
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.pana' | t }}</label>
-            <input type="number" inputmode="numeric" [ngModel]="form().pana" (ngModelChange)="updateField('pana', +$event || 0)" />
+            <input type="number" inputmode="numeric" placeholder="e.g. 54" [ngModel]="form().pana || ''" (ngModelChange)="updateField('pana', +$event || 0)" />
             <small class="field-hint">{{ 'fh.pana' | t }}</small>
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.mtr' | t }}</label>
-            <input type="number" inputmode="decimal" [ngModel]="form().totalMeters" (ngModelChange)="updateField('totalMeters', +$event || 0)" />
+            <input type="number" inputmode="decimal" placeholder="e.g. 512" [ngModel]="form().totalMeters || ''" (ngModelChange)="updateField('totalMeters', +$event || 0)" />
             <small class="field-hint">{{ 'fh.mtr' | t }}</small>
           </div>
           <div class="field-group">
@@ -114,7 +114,8 @@
                 type="number"
                 inputmode="numeric"
                 min="0"
-                [ngModel]="form().sizeBreakdown[size] || 0"
+                placeholder="0"
+                [ngModel]="form().sizeBreakdown[size] || ''"
                 (ngModelChange)="updateSize(size, $event)"
               />
             </div>
@@ -141,7 +142,7 @@
               </div>
               <div class="field-group">
                 <label class="field-label">{{ 'f.mtr' | t }}</label>
-                <input type="number" inputmode="numeric" [ngModel]="bale.meters" (ngModelChange)="updateBale(bale.id, 'meters', $event)" />
+                <input type="number" inputmode="numeric" placeholder="e.g. 86" [ngModel]="bale.meters || ''" (ngModelChange)="updateBale(bale.id, 'meters', $event)" />
               </div>
               <button type="button" class="bale-remove" (click)="removeBale(bale.id)" [attr.aria-label]="'btn.remove' | t" [attr.title]="'btn.remove' | t">×</button>
             </div>
@@ -168,23 +169,23 @@
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.markerLength' | t }}</label>
-            <input type="number" [ngModel]="form().cutting.markerLength" (ngModelChange)="updateCutting({ markerLength: $event })" />
+            <input type="number" [ngModel]="form().cutting.markerLength || ''" (ngModelChange)="updateCutting({ markerLength: $event })" />
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.markerWidth' | t }}</label>
-            <input type="number" [ngModel]="form().cutting.markerWidth" (ngModelChange)="updateCutting({ markerWidth: $event })" />
+            <input type="number" [ngModel]="form().cutting.markerWidth || ''" (ngModelChange)="updateCutting({ markerWidth: $event })" />
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.layLength' | t }}</label>
-            <input type="number" [ngModel]="form().cutting.layLength" (ngModelChange)="updateCutting({ layLength: $event })" />
+            <input type="number" [ngModel]="form().cutting.layLength || ''" (ngModelChange)="updateCutting({ layLength: $event })" />
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.layers' | t }}</label>
-            <input type="number" [ngModel]="form().cutting.noOfLayers" (ngModelChange)="updateCutting({ noOfLayers: $event })" />
+            <input type="number" [ngModel]="form().cutting.noOfLayers || ''" (ngModelChange)="updateCutting({ noOfLayers: $event })" />
           </div>
           <div class="field-group">
             <label class="field-label">{{ 'f.plies' | t }}</label>
-            <input type="number" [ngModel]="form().cutting.noOfPlies" (ngModelChange)="updateCutting({ noOfPlies: $event })" />
+            <input type="number" [ngModel]="form().cutting.noOfPlies || ''" (ngModelChange)="updateCutting({ noOfPlies: $event })" />
           </div>
           <div class="field-group full-width">
             <label class="field-label">{{ 'f.patternImage' | t }}</label>
