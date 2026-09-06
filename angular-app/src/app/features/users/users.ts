@@ -1,0 +1,87 @@
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { TPipe } from '../../core/t.pipe';
+import { UiStore } from '../../core/ui-store';
+import { SessionService } from '../../core/session.service';
+import { UsersService } from '../../core/users.service';
+import { EmptyState } from '../../shared/empty-state/empty-state';
+import { ROLE_OPTIONS, type Role } from '../../core/models';
+
+@Component({
+  selector: 'app-users',
+  standalone: true,
+  imports: [FormsModule, TPipe, EmptyState],
+  templateUrl: './users.html',
+})
+export class Users implements OnInit {
+  readonly ui = inject(UiStore);
+  readonly session = inject(SessionService);
+  readonly usersService = inject(UsersService);
+
+  readonly roles = ROLE_OPTIONS;
+  readonly users = this.usersService.users;
+
+  readonly form = signal<{ username: string; name: string; pin: string; role: Role }>({
+    username: '',
+    name: '',
+    pin: '',
+    role: 'Operator',
+  });
+  readonly takenError = signal(false);
+
+  readonly pinEdits = signal<Record<string, string>>({});
+
+  readonly canAdd = computed(() => {
+    const f = this.form();
+    return f.username.trim().length > 0 && /^\d{4,6}$/.test(f.pin);
+  });
+
+  ngOnInit(): void {
+    this.ui.setSection('users');
+  }
+
+  patch<K extends 'username' | 'name' | 'pin' | 'role'>(key: K, value: string): void {
+    this.form.update((f) => ({ ...f, [key]: key === 'role' ? (value as Role) : value }));
+    this.takenError.set(false);
+  }
+
+  async add(): Promise<void> {
+    const f = this.form();
+    if (!this.canAdd()) return;
+    if (this.usersService.usernameTaken(f.username)) {
+      this.takenError.set(true);
+      return;
+    }
+    await this.usersService.addUser(f);
+    this.form.set({ username: '', name: '', pin: '', role: 'Operator' });
+  }
+
+  setPinEdit(username: string, value: string): void {
+    this.pinEdits.update((m) => ({ ...m, [username]: value }));
+  }
+
+  async savePin(username: string): Promise<void> {
+    const pin = (this.pinEdits()[username] || '').trim();
+    if (!/^\d{4,6}$/.test(pin)) return;
+    await this.usersService.setPin(username, pin);
+    this.pinEdits.update((m) => {
+      const next = { ...m };
+      delete next[username];
+      return next;
+    });
+  }
+
+  toggleActive(username: string, active: boolean): void {
+    void this.usersService.setActive(username, active);
+  }
+
+  changeRole(username: string, role: string): void {
+    void this.usersService.setRole(username, role as Role);
+  }
+
+  async remove(username: string): Promise<void> {
+    if (username === this.session.currentUser()?.username) return;
+    if (!confirm(`Delete user "${username}"?`)) return;
+    await this.usersService.remove(username);
+  }
+}

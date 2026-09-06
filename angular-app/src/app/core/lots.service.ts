@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import {
   addDoc,
   collection,
@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firestore';
 import { ensureAuth } from './auth';
+import { SessionService } from './session.service';
 import { createEmptySizeBreakdown, Lot, LotInput, LotStatus } from './models';
 
 const DEFAULT_SUPPLIERS = ['MTLNY', 'JAYDEEP', 'SUGAM', 'RUDRA', 'AMMEF', 'KAPIL', 'MGB', 'VISHAL'];
@@ -63,6 +64,8 @@ function docToLot(docSnap: QueryDocumentSnapshot<DocumentData>): Lot {
 export class LotsService {
   private lotsCol = collection(db, 'lots');
   private suppliersCol = collection(db, 'suppliers');
+
+  private session = inject(SessionService);
 
   readonly lots = signal<Lot[]>([]);
   readonly suppliers = signal<string[]>(DEFAULT_SUPPLIERS);
@@ -170,6 +173,7 @@ export class LotsService {
       lotNumber,
       totalPieces,
       averageConsumption,
+      createdBy: this.session.currentUser()?.name || input.createdBy || '',
       createdAt: now,
       updatedAt: now,
     });

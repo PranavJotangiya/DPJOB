@@ -20,7 +20,7 @@
       </div>
 
       <nav class="sidebar-nav">
-        @for (item of navItems; track item.id) {
+        @for (item of navItems(); track item.id) {
           <a class="nav-button" [routerLink]="item.route" routerLinkActive="active">
             <span class="nav-ico" aria-hidden="true">{{ icons[item.id] }}</span>
             <span>{{ 'nav.' + item.id | t }}</span>
@@ -53,7 +53,7 @@
   </div>
 
   <nav class="bottom-nav">
-    @for (item of primaryNav; track item.id) {
+    @for (item of primaryNav(); track item.id) {
       <a [routerLink]="item.route" routerLinkActive="active" [class.cta]="item.id === 'newLot'">
         <span class="bn-icon">{{ icons[item.id] }}</span>
         <span>{{ 'nav.' + item.id | t }}</span>
@@ -73,7 +73,7 @@
           <span>{{ 'nav.more' | t }}</span>
           <button type="button" class="more-close" (click)="ui.moreOpen.set(false)" [attr.aria-label]="'btn.close' | t">×</button>
         </div>
-        @for (item of moreNav; track item.id) {
+        @for (item of moreNav(); track item.id) {
           <a [routerLink]="item.route" routerLinkActive="active" (click)="ui.moreOpen.set(false)">
             {{ 'nav.' + item.id | t }}
           </a>

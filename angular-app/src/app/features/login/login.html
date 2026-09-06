@@ -1,0 +1,51 @@
+<div class="login-screen">
+  <form class="login-card" (ngSubmit)="submit()">
+    <div class="login-brand">
+      <div class="brand-mark">DP</div>
+      <div>
+        <h2>DP Creation</h2>
+        <small>Garment Cutting</small>
+      </div>
+    </div>
+
+    <h1>{{ 'login.title' | t }}</h1>
+    <p class="login-sub">{{ 'login.subtitle' | t }}</p>
+
+    <label class="field-group">
+      <span class="field-label">{{ 'login.username' | t }}</span>
+      <input
+        name="username"
+        autocomplete="username"
+        autocapitalize="none"
+        [ngModel]="username()"
+        (ngModelChange)="username.set($event); error.set(false)"
+      />
+    </label>
+
+    <label class="field-group">
+      <span class="field-label">{{ 'login.pin' | t }}</span>
+      <input
+        name="pin"
+        type="password"
+        inputmode="numeric"
+        autocomplete="current-password"
+        [ngModel]="pin()"
+        (ngModelChange)="pin.set($event); error.set(false)"
+      />
+    </label>
+
+    @if (error()) {
+      <div class="login-error">{{ 'login.error' | t }}</div>
+    }
+
+    <button type="submit" class="primary-button" [disabled]="busy()">
+      {{ (busy() ? 'login.busy' : 'login.submit') | t }}
+    </button>
+
+    <select class="login-lang" (change)="onLang($event)" [value]="i18n.lang()">
+      @for (l of languages; track l.code) {
+        <option [value]="l.code">{{ l.label }}</option>
+      }
+    </select>
+  </form>
+</div>

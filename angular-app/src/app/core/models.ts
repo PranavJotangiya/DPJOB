@@ -86,7 +86,25 @@ export const defaultLotInput = (): LotInput => ({
 });
 
 export type Role = 'Admin' | 'Supervisor' | 'Operator' | 'Viewer';
+export const ROLE_OPTIONS: Role[] = ['Admin', 'Supervisor', 'Operator', 'Viewer'];
 export type LangCode = 'en' | 'hi' | 'gu';
+
+/** A row in the `users` collection (doc id = lowercase username). */
+export interface AppUser {
+  username: string;
+  name: string;
+  role: Role;
+  active: boolean;
+  pinHash: string;
+  createdAt: string;
+}
+
+/** The signed-in identity kept in the app + localStorage. */
+export interface SessionUser {
+  username: string;
+  name: string;
+  role: Role;
+}
 
 /** Editing an existing lot: seed the form from it (merging in any sizes it's
  * missing so the matrix always shows all 19). */

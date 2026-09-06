@@ -1,6 +1,14 @@
 <section class="page-stack">
   <div class="settings-grid">
     <div class="panel-card">
+      <h3>{{ 'login.title' | t }}</h3>
+      <div class="settings-row">
+        <label>{{ session.currentUser()?.name }} · {{ 'role.' + (session.currentUser()?.role || 'Operator') | t }}</label>
+        <button type="button" class="danger-button small" (click)="logout()">{{ 'btn.logout' | t }}</button>
+      </div>
+    </div>
+
+    <div class="panel-card">
       <h3>{{ 'set.language' | t }}</h3>
       <div class="settings-row">
         <label>{{ 'set.language' | t }}</label>

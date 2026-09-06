@@ -10,5 +10,6 @@ export const routes: Routes = [
   { path: 'bale', loadComponent: () => import('./features/bale/bale').then((m) => m.Bale) },
   { path: 'reports', loadComponent: () => import('./features/reports/reports').then((m) => m.Reports) },
   { path: 'settings', loadComponent: () => import('./features/settings/settings').then((m) => m.Settings) },
+  { path: 'users', loadComponent: () => import('./features/users/users').then((m) => m.Users) },
   { path: '**', redirectTo: 'dashboard' },
 ];
