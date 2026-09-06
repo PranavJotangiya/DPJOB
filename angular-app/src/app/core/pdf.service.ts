@@ -377,6 +377,33 @@ export class PdfService {
     });
     y += cutH;
 
+    // ---- Pattern / Farma image ----------------------------
+    if (lot.patternImage) {
+      gap();
+      sectionHead(L('patternImage'));
+      try {
+        const props = doc.getImageProperties(lot.patternImage);
+        const maxH = 110;
+        let iw = CW;
+        let ih = (props.height / props.width) * iw;
+        if (ih > maxH) {
+          ih = maxH;
+          iw = (props.width / props.height) * ih;
+        }
+        ensure(ih + 8);
+        stroke(LINE);
+        fill([255, 255, 255]);
+        doc.roundedRect(M, y, CW, ih + 4, 2, 2, 'S');
+        doc.addImage(lot.patternImage, 'JPEG', M + (CW - iw) / 2, y + 2, iw, ih, undefined, 'FAST');
+        y += ih + 8;
+      } catch {
+        font('normal', 8.5);
+        ink(MUTED);
+        doc.text('—', M, y + 4);
+        y += 8;
+      }
+    }
+
     // ---- Notes ---------------------------------------------
     gap();
     sectionHead(L('notes'));

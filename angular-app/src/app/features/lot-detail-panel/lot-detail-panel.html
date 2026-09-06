@@ -46,6 +46,13 @@
         <h4>{{ 'detail.notes' | t }}</h4>
         <p>{{ lot()!.notes }}</p>
       </div>
+
+      @if (lot()!.patternImage) {
+        <div class="detail-card detail-card-wide">
+          <h4>{{ 'f.patternImage' | t }}</h4>
+          <img class="detail-pattern" [src]="lot()!.patternImage" alt="pattern" />
+        </div>
+      }
     </div>
   </div>
 }

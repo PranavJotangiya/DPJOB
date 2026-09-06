@@ -5,6 +5,7 @@ import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { LotsService } from '../../core/lots.service';
 import { I18nService } from '../../core/i18n.service';
+import { fileToCompressedDataUrl } from '../../core/image';
 import {
   Bale,
   createEmptySizeBreakdown,
@@ -40,6 +41,7 @@ export class LotForm implements OnInit {
   readonly form = signal<LotInput>(this.editingLot ? toFormInput(this.editingLot) : defaultLotInput());
   readonly errors = signal<string[]>([]);
   readonly bulkFillValue = signal<number | null>(null);
+  readonly imageBusy = signal(false);
 
   readonly sizeTotal = computed(() =>
     Object.values(this.form().sizeBreakdown).reduce((sum, v) => sum + (Number(v) || 0), 0),
@@ -60,6 +62,28 @@ export class LotForm implements OnInit {
 
   updateCutting(patch: Partial<CuttingInfo>): void {
     this.form.update((f) => ({ ...f, cutting: { ...f.cutting, ...patch } }));
+  }
+
+  async onPatternImage(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.imageBusy.set(true);
+    try {
+      let dataUrl = await fileToCompressedDataUrl(file);
+      // keep the lot document comfortably under Firestore's 1 MiB limit
+      if (dataUrl.length > 850_000) dataUrl = await fileToCompressedDataUrl(file, 1000, 0.6);
+      this.updateField('patternImage', dataUrl);
+    } catch {
+      this.errors.set(['Could not read that image. Try another photo.']);
+    } finally {
+      this.imageBusy.set(false);
+      input.value = '';
+    }
+  }
+
+  removePatternImage(): void {
+    this.updateField('patternImage', '');
   }
 
   updateSize(size: number, value: string | number): void {

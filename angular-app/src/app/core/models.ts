@@ -42,6 +42,8 @@ export interface Lot {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  /** Pattern / farma image as a compressed JPEG data URL ('' if none). */
+  patternImage: string;
   sizeBreakdown: Record<string, number>;
   bales: Bale[];
   cutting: CuttingInfo;
@@ -80,6 +82,7 @@ export const defaultLotInput = (): LotInput => ({
   status: 'Draft',
   notes: '',
   createdBy: 'Operator 01',
+  patternImage: '',
   sizeBreakdown: createEmptySizeBreakdown(),
   bales: [],
   cutting: defaultCutting(),
@@ -127,6 +130,7 @@ export function toFormInput(lot: Lot): LotInput {
     status: lot.status || 'Draft',
     notes: lot.notes || '',
     createdBy: lot.createdBy || 'Operator 01',
+    patternImage: lot.patternImage || '',
     sizeBreakdown: { ...createEmptySizeBreakdown(), ...(lot.sizeBreakdown || {}) },
     bales: (lot.bales || []).map((b, i) => ({
       id: b.id || `${Date.now()}-${i}`,

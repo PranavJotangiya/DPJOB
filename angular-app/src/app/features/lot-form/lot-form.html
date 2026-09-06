@@ -200,7 +200,19 @@
           </div>
           <div class="field-group full-width">
             <label class="field-label">{{ 'f.patternImage' | t }}</label>
-            <input type="file" accept="image/*" />
+            <input type="file" accept="image/*" capture="environment" (change)="onPatternImage($event)" />
+            <small class="field-hint">{{ 'fh.patternImage' | t }}</small>
+            @if (imageBusy()) {
+              <small class="field-hint">{{ 'fh.imageBusy' | t }}</small>
+            }
+            @if (form().patternImage) {
+              <div class="pattern-preview">
+                <img [src]="form().patternImage" alt="pattern" />
+                <button type="button" class="ghost-button small" (click)="removePatternImage()">
+                  {{ 'btn.remove' | t }}
+                </button>
+              </div>
+            }
           </div>
         </div>
       </section>

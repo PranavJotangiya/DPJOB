@@ -47,6 +47,7 @@ function docToLot(docSnap: QueryDocumentSnapshot<DocumentData>): Lot {
     createdBy: data['createdBy'] ?? '',
     createdAt: data['createdAt'] ?? '',
     updatedAt: data['updatedAt'] ?? '',
+    patternImage: data['patternImage'] ?? '',
     sizeBreakdown: { ...createEmptySizeBreakdown(), ...(data['sizeBreakdown'] ?? {}) },
     bales: Array.isArray(data['bales']) ? data['bales'] : [],
     cutting: data['cutting'] ?? {
