@@ -17,6 +17,8 @@ const STORAGE_KEY = 'dp-session';
 export class SessionService {
   readonly currentUser = signal<SessionUser | null>(null);
   readonly ready = signal(false);
+  /** True when the `users` collection is empty — show the first-run setup. */
+  readonly needsSetup = signal(false);
 
   readonly isAdmin = computed(() => this.currentUser()?.role === 'Admin');
   readonly canEdit = computed(() => {
@@ -25,40 +27,67 @@ export class SessionService {
   });
 
   constructor() {
-    this.restore();
+    const hadSession = this.restore();
+    if (hadSession) {
+      this.ready.set(true);
+      return;
+    }
     ensureAuth()
-      .then(() => this.ensureBootstrapAdmin())
+      .then(() => this.checkSetup())
       .catch(() => {
-        /* offline — login will just fail until connectivity returns */
+        // offline — no way to know; fall back to the login screen
+        this.needsSetup.set(false);
+        this.ready.set(true);
       });
   }
 
-  /** First run on a fresh database has no users — seed admin / 1234 so
-   *  someone can get in. The Users page nags to change it. */
-  private async ensureBootstrapAdmin(): Promise<void> {
+  private async checkSetup(): Promise<void> {
     try {
-      const existing = await getDocs(query(collection(db, 'users'), limit(1)));
-      if (!existing.empty) return;
-      await setDoc(doc(db, 'users', 'admin'), {
-        name: 'Admin',
-        role: 'Admin' as Role,
-        active: true,
-        pinHash: await hashPin('1234'),
-        createdAt: new Date().toISOString(),
-      });
+      const snap = await getDocs(query(collection(db, 'users'), limit(1)));
+      this.needsSetup.set(snap.empty);
     } catch {
-      /* rules or connectivity — nothing we can do here */
+      this.needsSetup.set(false);
+    } finally {
+      this.ready.set(true);
     }
   }
 
-  private restore(): void {
+  /** @returns true if a saved session was loaded. */
+  private restore(): boolean {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) this.currentUser.set(JSON.parse(raw) as SessionUser);
+      if (raw) {
+        this.currentUser.set(JSON.parse(raw) as SessionUser);
+        return true;
+      }
     } catch {
       // ignore corrupt/blocked storage — user just logs in again
     }
-    this.ready.set(true);
+    return false;
+  }
+
+  private persist(user: SessionUser): void {
+    this.currentUser.set(user);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    } catch {
+      // non-fatal — session just won't survive a reload
+    }
+  }
+
+  /** First-run: create the very first user as Admin and sign them in. */
+  async createFirstAdmin(input: { username: string; name: string; pin: string }): Promise<void> {
+    const id = input.username.trim().toLowerCase();
+    const name = input.name.trim() || id;
+    await setDoc(doc(db, 'users', id), {
+      name,
+      role: 'Admin' as Role,
+      active: true,
+      pinHash: await hashPin(input.pin),
+      createdAt: new Date().toISOString(),
+    });
+    this.needsSetup.set(false);
+    this.persist({ username: id, name, role: 'Admin' });
   }
 
   /** Returns true on success; false for unknown user / wrong PIN / disabled. */
@@ -73,17 +102,11 @@ export class SessionService {
     if (data['active'] === false) return false;
     if (data['pinHash'] !== (await hashPin(pin))) return false;
 
-    const session: SessionUser = {
+    this.persist({
       username: id,
       name: (data['name'] as string) || id,
       role: (data['role'] as Role) || 'Operator',
-    };
-    this.currentUser.set(session);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    } catch {
-      // non-fatal — session just won't survive a reload
-    }
+    });
     return true;
   }
 

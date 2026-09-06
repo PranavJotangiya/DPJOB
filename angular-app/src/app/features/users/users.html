@@ -1,7 +1,7 @@
 <section class="page-stack">
   @if (!session.isAdmin()) {
     <div class="panel-card">
-      <app-empty-state [title]="'login.error' | t" [message]="'users.defaultHint' | t" />
+      <app-empty-state [title]="'nav.users' | t" [message]="'users.noAccess' | t" />
     </div>
   } @else {
     <div class="panel-card">

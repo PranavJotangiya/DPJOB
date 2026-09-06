@@ -1,0 +1,71 @@
+<div class="login-screen">
+  <form class="login-card" (ngSubmit)="submit()">
+    <div class="login-brand">
+      <div class="brand-mark">DP</div>
+      <div>
+        <h2>DP Creation</h2>
+        <small>Garment Cutting</small>
+      </div>
+    </div>
+
+    <h1>{{ 'setup.title' | t }}</h1>
+    <p class="login-sub">{{ 'setup.subtitle' | t }}</p>
+
+    <label class="field-group">
+      <span class="field-label">{{ 'users.name' | t }}</span>
+      <input name="name" [ngModel]="name()" (ngModelChange)="name.set($event)" />
+    </label>
+
+    <label class="field-group">
+      <span class="field-label">{{ 'login.username' | t }}</span>
+      <input
+        name="username"
+        autocapitalize="none"
+        autocomplete="username"
+        [ngModel]="username()"
+        (ngModelChange)="username.set($event)"
+      />
+    </label>
+
+    <label class="field-group">
+      <span class="field-label">{{ 'users.pin' | t }}</span>
+      <input
+        name="pin"
+        type="password"
+        inputmode="numeric"
+        maxlength="6"
+        [ngModel]="pin()"
+        (ngModelChange)="pin.set($event)"
+      />
+    </label>
+
+    <label class="field-group">
+      <span class="field-label">{{ 'setup.confirmPin' | t }}</span>
+      <input
+        name="pin2"
+        type="password"
+        inputmode="numeric"
+        maxlength="6"
+        [ngModel]="pin2()"
+        (ngModelChange)="pin2.set($event)"
+      />
+    </label>
+
+    @if (pin2().length > 0 && pin() !== pin2()) {
+      <div class="login-error">{{ 'setup.mismatch' | t }}</div>
+    }
+    @if (error()) {
+      <div class="login-error">{{ 'login.error' | t }}</div>
+    }
+
+    <button type="submit" class="primary-button" [disabled]="!canSubmit() || busy()">
+      {{ (busy() ? 'login.busy' : 'setup.submit') | t }}
+    </button>
+
+    <select class="login-lang" (change)="onLang($event)" [value]="i18n.lang()">
+      @for (l of languages; track l.code) {
+        <option [value]="l.code">{{ l.label }}</option>
+      }
+    </select>
+  </form>
+</div>
