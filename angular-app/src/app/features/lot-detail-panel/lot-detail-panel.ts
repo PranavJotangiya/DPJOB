@@ -1,10 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { LotsService } from '../../core/lots.service';
 import { PdfService } from '../../core/pdf.service';
 import { I18nService } from '../../core/i18n.service';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
+
+const HIDDEN_SECTIONS = ['dashboard', 'newLot', 'editLot'];
 
 @Component({
   selector: 'app-lot-detail-panel',
@@ -17,6 +20,7 @@ export class LotDetailPanel {
   private lotsService = inject(LotsService);
   private pdf = inject(PdfService);
   private i18n = inject(I18nService);
+  private router = inject(Router);
 
   readonly lot = computed(() => {
     const id = this.ui.selectedLotId();
@@ -25,12 +29,12 @@ export class LotDetailPanel {
   });
 
   readonly visible = computed(
-    () => Boolean(this.lot()) && this.ui.currentSection() !== 'dashboard' && !this.ui.wizardOpen(),
+    () => Boolean(this.lot()) && !HIDDEN_SECTIONS.includes(this.ui.currentSection()),
   );
 
   edit(): void {
     const lot = this.lot();
-    if (lot) this.ui.openEditLot(lot);
+    if (lot) void this.router.navigateByUrl(`/lots/${lot.id}/edit`);
   }
 
   setStatus(status: 'Ready' | 'Cutting' | 'Completed'): void {

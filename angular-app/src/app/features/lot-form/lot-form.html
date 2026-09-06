@@ -1,14 +1,13 @@
-<div class="modal-backdrop">
-  <div class="wizard-panel">
-    <div class="wizard-header">
+<section class="page-stack">
+  <div class="panel-card">
+    <div class="detail-header">
       <div>
         <p class="eyebrow">{{ (isEditing ? 'wiz.editLotEyebrow' : 'wiz.newLotEyebrow') | t }}</p>
         <h2>{{ isEditing ? (form().lotNumber || ('wiz.editLot' | t)) : ('wiz.createLot' | t) }}</h2>
       </div>
-      <button type="button" class="close-button" (click)="close()" aria-label="Close">×</button>
+      <button type="button" class="ghost-button small" (click)="close()">{{ 'btn.cancel' | t }}</button>
     </div>
 
-    <div class="wizard-scroll">
       @if (errors().length > 0) {
         <div class="error-box">
           @for (error of errors(); track error) {
@@ -104,6 +103,18 @@
         <p class="section-hint">{{ 'hint.sizes' | t }}</p>
         <div class="matrix-toolbar">
           <button type="button" class="ghost-button small" (click)="bulkFill36()">{{ 'btn.bulkFill' | t }}</button>
+          <div class="bulk-fill-inline">
+            <input
+              type="number"
+              inputmode="numeric"
+              min="0"
+              class="bulk-fill-input"
+              [placeholder]="'ph.bulkFill' | t"
+              [ngModel]="bulkFillValue() ?? ''"
+              (ngModelChange)="bulkFillValue.set(+$event || null)"
+            />
+            <button type="button" class="ghost-button small" (click)="applyBulkFill()">{{ 'btn.bulkFillApply' | t }}</button>
+          </div>
           <button type="button" class="ghost-button small" (click)="clearAllSizes()">{{ 'btn.clearAll' | t }}</button>
         </div>
         <div class="size-matrix">
@@ -201,11 +212,10 @@
           <textarea rows="3" placeholder="e.g. 2 set cutting required" [ngModel]="form().notes" (ngModelChange)="updateField('notes', $event)"></textarea>
         </div>
       </section>
-    </div>
-
-    <div class="wizard-actions">
-      <button type="button" class="ghost-button" (click)="close()">{{ 'btn.cancel' | t }}</button>
-      <button type="button" class="primary-button" (click)="save()">{{ (isEditing ? 'btn.updateLot' : 'btn.saveLot') | t }}</button>
-    </div>
   </div>
-</div>
+
+  <div class="wizard-actions page-actions">
+    <button type="button" class="ghost-button" (click)="close()">{{ 'btn.cancel' | t }}</button>
+    <button type="button" class="primary-button" (click)="save()">{{ (isEditing ? 'btn.updateLot' : 'btn.saveLot') | t }}</button>
+  </div>
+</section>

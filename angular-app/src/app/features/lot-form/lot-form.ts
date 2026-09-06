@@ -1,6 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { LotsService } from '../../core/lots.service';
@@ -21,20 +21,25 @@ import {
   imports: [FormsModule, TPipe],
   templateUrl: './lot-form.html',
 })
-export class LotForm {
+export class LotForm implements OnInit {
   readonly ui = inject(UiStore);
   private lotsService = inject(LotsService);
   private i18n = inject(I18nService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   readonly sizeOptions = SIZE_OPTIONS;
   readonly suppliers = this.lotsService.suppliers;
 
-  readonly editingLot = this.ui.editingLot();
+  private readonly editingId = this.route.snapshot.paramMap.get('id');
+  readonly editingLot = this.editingId
+    ? this.lotsService.lots().find((l) => l.id === this.editingId) ?? null
+    : null;
   readonly isEditing = this.editingLot !== null;
 
   readonly form = signal<LotInput>(this.editingLot ? toFormInput(this.editingLot) : defaultLotInput());
   readonly errors = signal<string[]>([]);
+  readonly bulkFillValue = signal<number | null>(null);
 
   readonly sizeTotal = computed(() =>
     Object.values(this.form().sizeBreakdown).reduce((sum, v) => sum + (Number(v) || 0), 0),
@@ -65,9 +70,19 @@ export class LotForm {
   }
 
   bulkFill36(): void {
+    this.bulkFill(36);
+  }
+
+  applyBulkFill(): void {
+    const value = Number(this.bulkFillValue());
+    if (!value || value <= 0) return;
+    this.bulkFill(value);
+  }
+
+  private bulkFill(value: number): void {
     this.form.update((f) => ({
       ...f,
-      sizeBreakdown: Object.fromEntries(SIZE_OPTIONS.map((s) => [String(s), 36])),
+      sizeBreakdown: Object.fromEntries(SIZE_OPTIONS.map((s) => [String(s), value])),
     }));
   }
 
@@ -100,8 +115,12 @@ export class LotForm {
     this.updateField('lotNumber', `LOT-${maxN + 1}`);
   }
 
+  ngOnInit(): void {
+    this.ui.setSection(this.isEditing ? 'editLot' : 'newLot');
+  }
+
   close(): void {
-    this.ui.closeWizard();
+    void this.router.navigateByUrl('/lots');
   }
 
   async save(): Promise<void> {
@@ -125,7 +144,6 @@ export class LotForm {
         this.ui.showMessage(this.i18n.t()('msg.saved'));
       }
       this.ui.selectLot(id);
-      this.ui.closeWizard();
       this.errors.set([]);
       void this.router.navigateByUrl('/lots');
     } catch (err) {

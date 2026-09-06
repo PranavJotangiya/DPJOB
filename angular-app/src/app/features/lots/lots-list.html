@@ -16,19 +16,21 @@
   </div>
 
   <div class="panel-card">
-    @if (filtered().length === 0) {
+    @if (!lotsService.ready()) {
+      <app-skeleton-rows [rows]="6" />
+    } @else if (filtered().length === 0) {
       <app-empty-state
         [title]="(lotsService.lots().length === 0 ? 'empty.noLotsTitle' : 'empty.noMatchTitle') | t"
         [message]="(lotsService.lots().length === 0 ? 'empty.noLotsList' : 'empty.noMatchMsg') | t"
       >
         @if (lotsService.lots().length === 0) {
-          <button type="button" class="primary-button" (click)="ui.openNewLot()">{{ 'btn.newLot' | t }}</button>
+          <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
         } @else {
           <button type="button" class="ghost-button" (click)="clearSearch()">{{ 'btn.clearSearch' | t }}</button>
         }
       </app-empty-state>
     } @else {
-      <div class="table-wrap">
+      <div class="table-wrap lot-table">
         <table>
           <thead>
             <tr>
@@ -46,25 +48,52 @@
           <tbody>
             @for (lot of filtered(); track lot.id) {
               <tr>
-                <td [attr.data-label]="'col.lotNo' | t">{{ lot.lotNumber }}</td>
-                <td [attr.data-label]="'col.shortNo' | t">{{ lot.shortNumber }}</td>
-                <td [attr.data-label]="'col.supplier' | t">{{ lot.supplier }}</td>
-                <td [attr.data-label]="'col.mtr' | t">{{ lot.totalMeters }}</td>
-                <td [attr.data-label]="'col.pcs' | t">{{ lot.totalPieces }}</td>
-                <td [attr.data-label]="'col.cuttingDate' | t">{{ lot.cuttingDate }}</td>
-                <td [attr.data-label]="'col.status' | t"><app-status-badge [status]="lot.status" /></td>
-                <td [attr.data-label]="'col.createdBy' | t">{{ lot.createdBy }}</td>
-                <td [attr.data-label]="'col.action' | t" class="cell-actions">
+                <td>{{ lot.lotNumber }}</td>
+                <td>{{ lot.shortNumber || '—' }}</td>
+                <td>{{ lot.supplier || '—' }}</td>
+                <td>{{ lot.totalMeters }}</td>
+                <td>{{ lot.totalPieces }}</td>
+                <td>{{ lot.cuttingDate || '—' }}</td>
+                <td><app-status-badge [status]="lot.status" /></td>
+                <td>{{ lot.createdBy || '—' }}</td>
+                <td class="cell-actions">
                   <div class="inline-actions">
                     <button type="button" class="table-action" (click)="openDetail(lot.id)">{{ 'btn.detail' | t }}</button>
-                    <button type="button" class="table-action" (click)="print(lot.id)">{{ 'btn.pdf' | t }}</button>
-                    <button type="button" class="table-action" (click)="share(lot.id)">{{ 'btn.shareShort' | t }}</button>
+                    <button type="button" class="table-action pdf" (click)="print(lot.id)">{{ 'btn.pdf' | t }}</button>
+                    <button type="button" class="table-action share" (click)="share(lot.id)">{{ 'btn.shareShort' | t }}</button>
                   </div>
                 </td>
               </tr>
             }
           </tbody>
         </table>
+      </div>
+
+      <div class="lot-cards">
+        @for (lot of filtered(); track lot.id) {
+          <div class="lot-card">
+            <div class="lot-card-head">
+              <div class="lot-card-title">
+                <span>{{ 'col.lotNo' | t }}</span>
+                <strong>{{ lot.lotNumber }}</strong>
+              </div>
+              <app-status-badge [status]="lot.status" />
+            </div>
+            <div class="lot-card-body">
+              <div class="kv"><span>{{ 'col.shortNo' | t }}</span><span>{{ lot.shortNumber || '—' }}</span></div>
+              <div class="kv"><span>{{ 'col.supplier' | t }}</span><span>{{ lot.supplier || '—' }}</span></div>
+              <div class="kv"><span>{{ 'col.mtr' | t }}</span><span>{{ lot.totalMeters }}</span></div>
+              <div class="kv"><span>{{ 'col.pcs' | t }}</span><span>{{ lot.totalPieces }}</span></div>
+              <div class="kv"><span>{{ 'col.cuttingDate' | t }}</span><span>{{ lot.cuttingDate || '—' }}</span></div>
+              <div class="kv"><span>{{ 'col.createdBy' | t }}</span><span>{{ lot.createdBy || '—' }}</span></div>
+            </div>
+            <div class="lot-card-actions">
+              <button type="button" class="table-action" (click)="openDetail(lot.id)">{{ 'btn.detail' | t }}</button>
+              <button type="button" class="table-action pdf" (click)="print(lot.id)">{{ 'btn.pdf' | t }}</button>
+              <button type="button" class="table-action share" (click)="share(lot.id)">{{ 'btn.shareShort' | t }}</button>
+            </div>
+          </div>
+        }
       </div>
     }
   </div>

@@ -3,18 +3,17 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { I18nService } from '../../core/i18n.service';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
-import type { LangCode, Role } from '../../core/models';
-import { LotForm } from '../../features/lot-form/lot-form';
+import type { LangCode } from '../../core/models';
 import { LotDetailPanel } from '../../features/lot-detail-panel/lot-detail-panel';
 
 interface NavItem {
   id: string;
-  route: string | null;
+  route: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard', route: '/dashboard' },
-  { id: 'newLot', route: null },
+  { id: 'newLot', route: '/lots/new' },
   { id: 'lots', route: '/lots' },
   { id: 'cutting', route: '/cutting' },
   { id: 'bale', route: '/bale' },
@@ -32,13 +31,14 @@ const BN_ICONS: Record<string, string> = {
   settings: '⚙️',
 };
 
-const PRIMARY_NAV = ['dashboard', 'newLot', 'lots', 'cutting'];
+// newLot sits in the middle so its round "+" button is centered in the bar.
+const PRIMARY_NAV = ['dashboard', 'lots', 'newLot', 'cutting'];
 const MORE_NAV = ['bale', 'reports', 'settings'];
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TPipe, LotForm, LotDetailPanel],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TPipe, LotDetailPanel],
   templateUrl: './shell.html',
 })
 export class Shell {
@@ -50,18 +50,7 @@ export class Shell {
   readonly moreNav = MORE_NAV.map((id) => NAV_ITEMS.find((n) => n.id === id)!);
   readonly icons = BN_ICONS;
 
-  readonly roles: Role[] = ['Admin', 'Supervisor', 'Operator', 'Viewer'];
-
-  onRoleChange(event: Event): void {
-    this.ui.role.set((event.target as HTMLSelectElement).value as Role);
-  }
-
   onLangChange(event: Event): void {
     this.i18n.setLang((event.target as HTMLSelectElement).value as LangCode);
-  }
-
-  goToNav(id: string): void {
-    if (id === 'newLot') this.ui.openNewLot();
-    this.ui.moreOpen.set(false);
   }
 }

@@ -14,9 +14,11 @@
       <button type="button" class="ghost-button small">{{ 'btn.export' | t }}</button>
     </div>
 
-    @if (lots().length === 0) {
+    @if (!lotsService.ready()) {
+      <app-skeleton-rows [rows]="5" />
+    } @else if (lots().length === 0) {
       <app-empty-state [title]="'empty.noLotsTitle' | t" [message]="'empty.noLotsDash' | t">
-        <button type="button" class="primary-button" (click)="ui.openNewLot()">{{ 'btn.newLot' | t }}</button>
+        <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
       </app-empty-state>
     } @else {
       <div class="table-wrap">

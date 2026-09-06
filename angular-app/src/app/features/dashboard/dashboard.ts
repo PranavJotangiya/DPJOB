@@ -1,18 +1,19 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { LotsService } from '../../core/lots.service';
 import { StatCard } from '../../shared/stat-card/stat-card';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
 import { EmptyState } from '../../shared/empty-state/empty-state';
+import { SkeletonRows } from '../../shared/skeleton-rows/skeleton-rows';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [TPipe, StatCard, StatusBadge, EmptyState],
+  imports: [TPipe, StatCard, StatusBadge, EmptyState, RouterLink, SkeletonRows],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {

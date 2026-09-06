@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { LotsService } from '../../core/lots.service';
@@ -7,6 +8,7 @@ import { PdfService } from '../../core/pdf.service';
 import { I18nService } from '../../core/i18n.service';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
 import { EmptyState } from '../../shared/empty-state/empty-state';
+import { SkeletonRows } from '../../shared/skeleton-rows/skeleton-rows';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -23,7 +25,7 @@ const FILTERS: Array<[string, string]> = [
 @Component({
   selector: 'app-lots-list',
   standalone: true,
-  imports: [FormsModule, TPipe, StatusBadge, EmptyState],
+  imports: [FormsModule, TPipe, StatusBadge, EmptyState, RouterLink, SkeletonRows],
   templateUrl: './lots-list.html',
 })
 export class LotsList implements OnInit {

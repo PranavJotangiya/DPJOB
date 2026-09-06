@@ -6,13 +6,13 @@
         <h3>{{ lot()!.lotNumber }}</h3>
       </div>
       <div class="detail-actions">
-        <button type="button" class="ghost-button small" (click)="edit()">{{ 'btn.edit' | t }}</button>
-        <button type="button" class="ghost-button small" (click)="setStatus('Ready')">{{ 'status.Ready' | t }}</button>
-        <button type="button" class="ghost-button small" (click)="setStatus('Cutting')">{{ 'status.Cutting' | t }}</button>
-        <button type="button" class="ghost-button small" (click)="setStatus('Completed')">{{ 'status.Completed' | t }}</button>
+        <button type="button" class="ghost-button small edit-btn" (click)="edit()">{{ 'btn.edit' | t }}</button>
+        <button type="button" class="ghost-button small st-ready" (click)="setStatus('Ready')">{{ 'status.Ready' | t }}</button>
+        <button type="button" class="ghost-button small st-cutting" (click)="setStatus('Cutting')">{{ 'status.Cutting' | t }}</button>
+        <button type="button" class="ghost-button small st-completed" (click)="setStatus('Completed')">{{ 'status.Completed' | t }}</button>
         <button type="button" class="danger-button small" (click)="remove()">{{ 'btn.delete' | t }}</button>
         <button type="button" class="ghost-button small" (click)="print()">{{ 'btn.print' | t }}</button>
-        <button type="button" class="primary-button small" (click)="share()">{{ 'btn.share' | t }}</button>
+        <button type="button" class="primary-button small share-btn" (click)="share()">{{ 'btn.share' | t }}</button>
       </div>
     </div>
 

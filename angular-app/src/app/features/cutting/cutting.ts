@@ -4,11 +4,12 @@ import { UiStore } from '../../core/ui-store';
 import { LotsService } from '../../core/lots.service';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
 import { MiniStat } from '../../shared/mini-stat/mini-stat';
+import { SkeletonRows } from '../../shared/skeleton-rows/skeleton-rows';
 
 @Component({
   selector: 'app-cutting',
   standalone: true,
-  imports: [TPipe, StatusBadge, MiniStat],
+  imports: [TPipe, StatusBadge, MiniStat, SkeletonRows],
   templateUrl: './cutting.html',
 })
 export class Cutting implements OnInit {
