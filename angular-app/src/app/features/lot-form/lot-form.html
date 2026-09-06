@@ -19,6 +19,23 @@
       <section class="form-section">
         <h3>{{ 'sec.lot' | t }}</h3>
         <p class="section-hint">{{ 'hint.lot' | t }}</p>
+
+        <div class="field-group full-width party-picker">
+          <label class="field-label">{{ 'f.party' | t }}</label>
+          <select [ngModel]="form().party" (ngModelChange)="updateField('party', $event)">
+            <option value="">{{ 'party.choose' | t }}</option>
+            @for (p of partyNames(); track p) {
+              <option [value]="p">{{ p }}</option>
+            }
+          </select>
+          @if (partyNames().length === 0) {
+            <small class="field-hint">
+              {{ 'party.noneHint' | t }}
+              <a routerLink="/parties">{{ 'party.add' | t }}</a>
+            </small>
+          }
+        </div>
+
         <div class="wizard-grid">
           <div class="field-group">
             <label class="field-label">{{ 'f.lotNo' | t }}</label>
@@ -200,7 +217,12 @@
           </div>
           <div class="field-group full-width">
             <label class="field-label">{{ 'f.patternImage' | t }}</label>
-            <input type="file" accept="image/*" capture="environment" (change)="onPatternImage($event)" />
+            <div class="inline-actions">
+              <input type="file" accept="image/*" capture="environment" (change)="onPatternImage($event)" />
+              <button type="button" class="ghost-button small" (click)="drawOpen.set(true)">
+                {{ 'pattern.draw' | t }}
+              </button>
+            </div>
             <small class="field-hint">{{ 'fh.patternImage' | t }}</small>
             @if (imageBusy()) {
               <small class="field-hint">{{ 'fh.imageBusy' | t }}</small>
@@ -230,4 +252,8 @@
     <button type="button" class="ghost-button" (click)="close()">{{ 'btn.cancel' | t }}</button>
     <button type="button" class="primary-button" (click)="save()">{{ (isEditing ? 'btn.updateLot' : 'btn.saveLot') | t }}</button>
   </div>
+
+  @if (drawOpen()) {
+    <app-pattern-pad (done)="onDrawDone($event)" />
+  }
 </section>

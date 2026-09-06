@@ -11,22 +11,24 @@
 
   <div class="app-body">
     <aside class="sidebar">
-      <div class="brand-block">
-        <div class="brand-mark">DP</div>
-        <div>
-          <h2>DP Creation</h2>
-          <small>Garment Cutting</small>
+      <div class="sidebar-inner">
+        <div class="brand-block">
+          <div class="brand-mark">DP</div>
+          <div>
+            <h2>DP Creation</h2>
+            <small>Garment Cutting</small>
+          </div>
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        @for (item of navItems(); track item.id) {
-          <a class="nav-button" [routerLink]="item.route" routerLinkActive="active">
-            <span class="nav-ico" aria-hidden="true">{{ icons[item.id] }}</span>
-            <span>{{ 'nav.' + item.id | t }}</span>
-          </a>
-        }
-      </nav>
+        <nav class="sidebar-nav">
+          @for (item of navItems(); track item.id) {
+            <a class="nav-button" [routerLink]="item.route" routerLinkActive="active">
+              <span class="nav-ico" aria-hidden="true">{{ icons[item.id] }}</span>
+              <span>{{ 'nav.' + item.id | t }}</span>
+            </a>
+          }
+        </nav>
+      </div>
     </aside>
 
     <main class="content-panel">

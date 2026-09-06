@@ -20,6 +20,7 @@
       <div class="detail-card">
         <h4>{{ 'detail.lotInfo' | t }}</h4>
         <div class="key-value"><span>{{ 'detail.lotNo' | t }}</span><strong>{{ lot()!.lotNumber }}</strong></div>
+        <div class="key-value"><span>{{ 'f.party' | t }}</span><strong>{{ lot()!.party || '—' }}</strong></div>
         <div class="key-value"><span>{{ 'detail.status' | t }}</span><app-status-badge [status]="lot()!.status" /></div>
         <div class="key-value"><span>{{ 'detail.program' | t }}</span><strong>{{ lot()!.programDate }}</strong></div>
         <div class="key-value"><span>{{ 'detail.cutDate' | t }}</span><strong>{{ lot()!.cuttingDate }}</strong></div>

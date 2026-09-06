@@ -45,6 +45,7 @@ export class LotsList implements OnInit {
       const textMatch =
         !term ||
         item.lotNumber.toLowerCase().includes(term) ||
+        (item.party || '').toLowerCase().includes(term) ||
         item.shortNumber.toLowerCase().includes(term) ||
         (item.shortName || '').toLowerCase().includes(term) ||
         item.supplier.toLowerCase().includes(term) ||

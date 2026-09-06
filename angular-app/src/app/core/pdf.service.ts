@@ -174,6 +174,7 @@ export class PdfService {
     };
     const colW = (CW - 6) / 2;
     const h1 = infoCard(M, colW, L('lotInfo'), [
+      [L('party'), lot.party],
       [L('date'), lot.date],
       [L('programDate'), lot.programDate],
       [L('cuttingDate'), lot.cuttingDate],

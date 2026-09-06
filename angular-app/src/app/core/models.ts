@@ -24,6 +24,8 @@ export interface CuttingInfo {
 export interface Lot {
   id: string;
   lotNumber: string;
+  /** The party this lot belongs to (party name; '' if unset on old data). */
+  party: string;
   date: string;
   supplier: string;
   shortNumber: string;
@@ -66,6 +68,7 @@ export const defaultCutting = (): CuttingInfo => ({
 
 export const defaultLotInput = (): LotInput => ({
   lotNumber: '',
+  party: '',
   date: new Date().toISOString().slice(0, 10),
   supplier: '',
   shortNumber: '',
@@ -114,6 +117,7 @@ export interface SessionUser {
 export function toFormInput(lot: Lot): LotInput {
   return {
     lotNumber: lot.lotNumber || '',
+    party: lot.party || '',
     date: lot.date || new Date().toISOString().slice(0, 10),
     supplier: lot.supplier || '',
     shortNumber: lot.shortNumber || '',

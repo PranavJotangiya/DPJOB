@@ -1,11 +1,13 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { LotsService } from '../../core/lots.service';
+import { PartiesService } from '../../core/parties.service';
 import { I18nService } from '../../core/i18n.service';
 import { fileToCompressedDataUrl } from '../../core/image';
+import { PatternPad } from '../pattern-pad/pattern-pad';
 import {
   Bale,
   createEmptySizeBreakdown,
@@ -19,18 +21,20 @@ import {
 @Component({
   selector: 'app-lot-form',
   standalone: true,
-  imports: [FormsModule, TPipe],
+  imports: [FormsModule, TPipe, PatternPad, RouterLink],
   templateUrl: './lot-form.html',
 })
 export class LotForm implements OnInit {
   readonly ui = inject(UiStore);
   private lotsService = inject(LotsService);
+  private partiesService = inject(PartiesService);
   private i18n = inject(I18nService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   readonly sizeOptions = SIZE_OPTIONS;
   readonly suppliers = this.lotsService.suppliers;
+  readonly partyNames = this.partiesService.names;
 
   private readonly editingId = this.route.snapshot.paramMap.get('id');
   readonly editingLot = this.editingId
@@ -42,6 +46,7 @@ export class LotForm implements OnInit {
   readonly errors = signal<string[]>([]);
   readonly bulkFillValue = signal<number | null>(null);
   readonly imageBusy = signal(false);
+  readonly drawOpen = signal(false);
 
   readonly sizeTotal = computed(() =>
     Object.values(this.form().sizeBreakdown).reduce((sum, v) => sum + (Number(v) || 0), 0),
@@ -84,6 +89,11 @@ export class LotForm implements OnInit {
 
   removePatternImage(): void {
     this.updateField('patternImage', '');
+  }
+
+  onDrawDone(dataUrl: string | null): void {
+    this.drawOpen.set(false);
+    if (dataUrl) this.updateField('patternImage', dataUrl);
   }
 
   updateSize(size: number, value: string | number): void {

@@ -29,6 +29,7 @@ function docToLot(docSnap: QueryDocumentSnapshot<DocumentData>): Lot {
   return {
     id: docSnap.id,
     lotNumber: data['lotNumber'] ?? '',
+    party: data['party'] ?? '',
     date: data['date'] ?? '',
     supplier: data['supplier'] ?? '',
     shortNumber: data['shortNumber'] ?? '',

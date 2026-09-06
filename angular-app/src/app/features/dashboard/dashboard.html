@@ -1,4 +1,14 @@
 <section class="page-stack">
+  <div class="dash-party">
+    <label class="field-label">{{ 'f.party' | t }}</label>
+    <select [ngModel]="party()" (ngModelChange)="setParty($event)">
+      <option value="">{{ 'party.all' | t }}</option>
+      @for (p of partyNames(); track p) {
+        <option [value]="p">{{ p }}</option>
+      }
+    </select>
+  </div>
+
   <div class="summary-grid">
     <app-stat-card [label]="'stat.activeLots' | t" [value]="stats().activeLots" tone="blue" />
     <app-stat-card [label]="'stat.todaysCutting' | t" [value]="stats().todaysCutting" tone="orange" />

@@ -35,6 +35,7 @@
           <thead>
             <tr>
               <th>{{ 'col.lotNo' | t }}</th>
+              <th>{{ 'col.party' | t }}</th>
               <th>{{ 'col.shortNo' | t }}</th>
               <th>{{ 'col.supplier' | t }}</th>
               <th>{{ 'col.mtr' | t }}</th>
@@ -49,6 +50,7 @@
             @for (lot of filtered(); track lot.id) {
               <tr>
                 <td>{{ lot.lotNumber }}</td>
+                <td>{{ lot.party || '—' }}</td>
                 <td>{{ lot.shortNumber || '—' }}</td>
                 <td>{{ lot.supplier || '—' }}</td>
                 <td>{{ lot.totalMeters }}</td>
@@ -80,6 +82,7 @@
               <app-status-badge [status]="lot.status" />
             </div>
             <div class="lot-card-body">
+              <div class="kv"><span>{{ 'col.party' | t }}</span><span>{{ lot.party || '—' }}</span></div>
               <div class="kv"><span>{{ 'col.shortNo' | t }}</span><span>{{ lot.shortNumber || '—' }}</span></div>
               <div class="kv"><span>{{ 'col.supplier' | t }}</span><span>{{ lot.supplier || '—' }}</span></div>
               <div class="kv"><span>{{ 'col.mtr' | t }}</span><span>{{ lot.totalMeters }}</span></div>

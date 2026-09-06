@@ -1,0 +1,73 @@
+<div class="pad-overlay">
+  <div class="pad-head">
+    <strong>{{ 'pattern.title' | t }}</strong>
+    <button type="button" class="more-close" (click)="cancel()" [attr.aria-label]="'btn.close' | t">×</button>
+  </div>
+
+  <div class="pad-toolbar">
+    <div class="pad-group">
+      @for (t of ['blank', 'pants', 'shirt']; track t) {
+        <button
+          type="button"
+          class="pad-chip"
+          [class.on]="template() === t"
+          (click)="setTemplate($any(t))"
+        >
+          {{ 'pattern.' + t | t }}
+        </button>
+      }
+    </div>
+
+    <div class="pad-group">
+      @for (c of colors; track c) {
+        <button
+          type="button"
+          class="pad-swatch"
+          [class.on]="!erasing() && color() === c"
+          [style.background]="c"
+          (click)="setColor(c)"
+          aria-label="pen colour"
+        ></button>
+      }
+      <button type="button" class="pad-chip" [class.on]="erasing()" (click)="toggleErase()">
+        {{ 'pattern.erase' | t }}
+      </button>
+    </div>
+
+    <div class="pad-group">
+      @for (s of sizes; track s) {
+        <button
+          type="button"
+          class="pad-size"
+          [class.on]="size() === s"
+          (click)="setSize(s)"
+          aria-label="brush size"
+        >
+          <span [style.width.px]="s + 2" [style.height.px]="s + 2"></span>
+        </button>
+      }
+    </div>
+
+    <div class="pad-group">
+      <button type="button" class="pad-chip" (click)="undo()">{{ 'pattern.undo' | t }}</button>
+      <button type="button" class="pad-chip" (click)="clearAll()">{{ 'pattern.clear' | t }}</button>
+    </div>
+  </div>
+
+  <div class="pad-canvas-wrap">
+    <canvas
+      #canvas
+      class="pad-canvas"
+      (pointerdown)="onDown($event)"
+      (pointermove)="onMove($event)"
+      (pointerup)="onUp()"
+      (pointercancel)="onUp()"
+      (pointerleave)="onUp()"
+    ></canvas>
+  </div>
+
+  <div class="pad-actions">
+    <button type="button" class="ghost-button" (click)="cancel()">{{ 'btn.cancel' | t }}</button>
+    <button type="button" class="primary-button" (click)="save()">{{ 'pattern.save' | t }}</button>
+  </div>
+</div>

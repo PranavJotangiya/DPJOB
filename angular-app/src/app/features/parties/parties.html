@@ -1,0 +1,43 @@
+<section class="page-stack">
+  <div class="panel-card">
+    <div class="panel-header"><h3>{{ 'party.add' | t }}</h3></div>
+    <div class="inline-field">
+      <input
+        class="party-input"
+        [placeholder]="'party.name' | t"
+        [ngModel]="name()"
+        (ngModelChange)="setName($event)"
+        (keyup.enter)="add()"
+      />
+      <button type="button" class="primary-button small" [disabled]="!name().trim()" (click)="add()">
+        {{ 'party.add' | t }}
+      </button>
+    </div>
+    @if (takenError()) {
+      <div class="login-error">{{ 'party.taken' | t }}</div>
+    }
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3>{{ 'page.parties' | t }}</h3></div>
+    @if (parties().length === 0) {
+      <p class="section-hint">{{ 'party.none' | t }}</p>
+    } @else {
+      <div class="user-list">
+        @for (p of parties(); track p.id) {
+          <div class="user-row">
+            <div class="user-main">
+              <strong>{{ p.name }}</strong>
+              <span class="user-uname">{{ lotCount(p.name) }} {{ 'nav.lots' | t }}</span>
+            </div>
+            <div class="user-controls">
+              <button type="button" class="danger-button small" (click)="remove(p.id, p.name)">
+                {{ 'users.delete' | t }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
