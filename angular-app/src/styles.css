@@ -331,7 +331,7 @@ p {
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--brand), #6d8bf5);
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
   color: #fff;
   font-weight: 800;
   font-size: 0.9rem;
