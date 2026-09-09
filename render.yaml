@@ -1,0 +1,36 @@
+# Render blueprint for the DP Creation API (server/).
+#
+# One-time setup:
+#   1. render.com -> New -> Blueprint -> connect the PranavJotangiya/DPJOB repo.
+#      Render reads this file and creates the "dp-job-api" web service.
+#   2. In the service's Environment tab, set the one secret Render can't generate:
+#        FIREBASE_SERVICE_ACCOUNT = the full service-account JSON on a single line
+#   3. Deploy. The live URL is https://dp-job-api.onrender.com
+#      (if that name is taken Render adds a suffix — use whatever URL it shows,
+#       and update angular-app/src/environments/environment.production.ts to match).
+#
+# Free plan sleeps after ~15 min idle; first request then takes ~50 s.
+
+services:
+  - type: web
+    name: dp-job-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FIREBASE_PROJECT_ID
+        value: dp-creation-f3d30
+      - key: CORS_ORIGINS
+        value: https://dp-creation-f3d30.web.app,https://dp-creation-f3d30.firebaseapp.com
+      - key: SESSION_TTL
+        value: 30d
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
