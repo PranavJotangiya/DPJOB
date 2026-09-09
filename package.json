@@ -1,0 +1,19 @@
+{
+  "name": "dpjob",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DP Creation — Angular front end, Node/Express API, Firebase behind the API.",
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix angular-app install",
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "npm --prefix server run dev",
+    "dev:web": "npm --prefix angular-app start",
+    "build": "npm --prefix server run build && npm --prefix angular-app run build",
+    "start:api": "npm --prefix server start",
+    "deploy:hosting": "npm --prefix angular-app run build && firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

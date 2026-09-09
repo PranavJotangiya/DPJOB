@@ -1,6 +1,6 @@
-// Shared domain types for a fabric Lot. Firestore stores each Lot as one
-// document — sizes, bales and cutting info are embedded (map/array fields),
-// no joins needed.
+// Shared domain types for a fabric Lot. These mirror server/src/types.ts —
+// the wire contract with the Node API. One Lot is one document: sizes, bales
+// and cutting info are embedded, no joins needed.
 
 export const SIZE_OPTIONS = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42];
 
@@ -95,13 +95,15 @@ export type Role = 'Admin' | 'Supervisor' | 'Operator' | 'Viewer';
 export const ROLE_OPTIONS: Role[] = ['Admin', 'Supervisor', 'Operator', 'Viewer'];
 export type LangCode = 'en' | 'hi' | 'gu';
 
-/** A row in the `users` collection (doc id = lowercase username). */
+/**
+ * A user as the API returns it. The stored PIN hash stays on the server — it is
+ * deliberately not part of this shape.
+ */
 export interface AppUser {
   username: string;
   name: string;
   role: Role;
   active: boolean;
-  pinHash: string;
   createdAt: string;
 }
 

@@ -253,6 +253,7 @@ const DICT: Record<LangCode, Dict> = {
     'set.roleOperator': 'Operator — Create and edit assigned lots',
     'set.roleViewer': 'Viewer — View and reports',
 
+    'loader.working': 'Please wait',
     'msg.saved': 'Lot saved successfully.',
     'msg.updated': 'Lot updated successfully.',
 
@@ -506,6 +507,7 @@ const DICT: Record<LangCode, Dict> = {
     'set.roleOperator': 'ऑपरेटर — असाइन किए लॉट बनाएं व एडिट करें',
     'set.roleViewer': 'व्यूअर — देखना और रिपोर्ट',
 
+    'loader.working': 'कृपया प्रतीक्षा करें',
     'msg.saved': 'लॉट सेव हो गया।',
     'msg.updated': 'लॉट अपडेट हो गया।',
 
@@ -759,6 +761,7 @@ const DICT: Record<LangCode, Dict> = {
     'set.roleOperator': 'ઓપરેટર — સોંપેલા લોટ બનાવો અને એડિટ કરો',
     'set.roleViewer': 'વ્યૂઅર — જોવું અને રિપોર્ટ',
 
+    'loader.working': 'કૃપા કરીને રાહ જુઓ',
     'msg.saved': 'લોટ સેવ થઈ ગયો.',
     'msg.updated': 'લોટ અપડેટ થઈ ગયો.',
 

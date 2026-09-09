@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { LotsService } from '../../core/lots.service';
+import { apiErrorMessage } from '../../core/api';
 import { PartiesService } from '../../core/parties.service';
 import { I18nService } from '../../core/i18n.service';
 import { fileToCompressedDataUrl } from '../../core/image';
@@ -182,7 +183,11 @@ export class LotForm implements OnInit {
       void this.router.navigateByUrl('/lots');
     } catch (err) {
       console.error(err);
-      this.errors.set(['Unable to save lot. Check your connection and try again.']);
+      // The server explains refusals it knows about (role, validation); only
+      // fall back to the connection hint when it said nothing useful.
+      this.errors.set([
+        apiErrorMessage(err, 'Unable to save lot. Check your connection and try again.'),
+      ]);
     }
   }
 }

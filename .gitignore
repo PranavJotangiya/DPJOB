@@ -11,3 +11,6 @@ firestore-debug.log
 
 # The Angular app manages its own ignores (node_modules, dist, etc.)
 # under angular-app/.gitignore.
+
+# Root workspace scripts (concurrently)
+/node_modules/

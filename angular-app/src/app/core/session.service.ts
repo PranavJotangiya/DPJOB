@@ -1,121 +1,79 @@
-import { computed, Injectable, signal } from '@angular/core';
-import { collection, doc, getDoc, getDocs, limit, query, setDoc } from 'firebase/firestore';
-import { db } from './firestore';
-import { ensureAuth } from './auth';
-import { hashPin } from './pin';
-import type { Role, SessionUser } from './models';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { ApiService } from './api';
+import { TokenStore } from './token.store';
+import type { SessionUser } from './models';
 
-const STORAGE_KEY = 'dp-session';
+interface LoginResponse {
+  token: string;
+  user: SessionUser;
+}
 
 /**
- * App-level login on top of the (still-anonymous) Firebase session.
- * Firebase anonymous auth is the transport that satisfies the Firestore
- * rules; this service is the "who is using the app" identity — a username +
- * PIN checked against the `users` collection, remembered in localStorage.
+ * Who is using the app. The username + PIN are checked by the Node server,
+ * which returns a signed token; the browser never sees a PIN hash and never
+ * touches Firebase. A remembered session is re-validated against the server on
+ * start, so a deactivated or deleted user is signed out on their next visit.
  */
 @Injectable({ providedIn: 'root' })
 export class SessionService {
-  readonly currentUser = signal<SessionUser | null>(null);
+  private api = inject(ApiService);
+  private tokens = inject(TokenStore);
+
+  readonly currentUser = this.tokens.user.asReadonly();
   readonly ready = signal(false);
-  /** True when the `users` collection is empty — show the first-run setup. */
+  /** True when the server reports no users yet — show the first-run setup. */
   readonly needsSetup = signal(false);
 
-  readonly isAdmin = computed(() => this.currentUser()?.role === 'Admin');
-  readonly canEdit = computed(() => {
-    const r = this.currentUser()?.role;
-    return r === 'Admin' || r === 'Supervisor' || r === 'Operator';
-  });
+  /**
+   * There is no role-based access control — being signed in is the only thing
+   * that gates anything, and the server enforces exactly that. `role` survives
+   * as a label on the user record, not as a permission.
+   */
+  readonly isSignedIn = computed(() => this.currentUser() !== null);
 
   constructor() {
-    const hadSession = this.restore();
-    if (hadSession) {
-      this.ready.set(true);
-      return;
-    }
-    ensureAuth()
-      .then(() => this.checkSetup())
-      .catch(() => {
-        // offline — no way to know; fall back to the login screen
-        this.needsSetup.set(false);
-        this.ready.set(true);
-      });
+    void this.boot();
   }
 
-  private async checkSetup(): Promise<void> {
+  private async boot(): Promise<void> {
+    if (this.tokens.token()) {
+      try {
+        this.tokens.setUser(await this.api.get<SessionUser>('/auth/me'));
+        this.ready.set(true);
+        return;
+      } catch {
+        // A 401 already cleared the token in the interceptor; anything else
+        // means the server is unreachable. Either way, fall through.
+      }
+    }
     try {
-      const snap = await getDocs(query(collection(db, 'users'), limit(1)));
-      this.needsSetup.set(snap.empty);
+      const { needsSetup } = await this.api.get<{ needsSetup: boolean }>('/auth/setup-status');
+      this.needsSetup.set(needsSetup);
     } catch {
+      // Server down — show the login screen rather than the setup wizard.
       this.needsSetup.set(false);
     } finally {
       this.ready.set(true);
     }
   }
 
-  /** @returns true if a saved session was loaded. */
-  private restore(): boolean {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        this.currentUser.set(JSON.parse(raw) as SessionUser);
-        return true;
-      }
-    } catch {
-      // ignore corrupt/blocked storage — user just logs in again
-    }
-    return false;
-  }
-
-  private persist(user: SessionUser): void {
-    this.currentUser.set(user);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    } catch {
-      // non-fatal — session just won't survive a reload
-    }
-  }
-
   /** First-run: create the very first user as Admin and sign them in. */
   async createFirstAdmin(input: { username: string; name: string; pin: string }): Promise<void> {
-    const id = input.username.trim().toLowerCase();
-    const name = input.name.trim() || id;
-    await setDoc(doc(db, 'users', id), {
-      name,
-      role: 'Admin' as Role,
-      active: true,
-      pinHash: await hashPin(input.pin),
-      createdAt: new Date().toISOString(),
-    });
+    this.tokens.set(await this.api.post<LoginResponse>('/auth/setup', input));
     this.needsSetup.set(false);
-    this.persist({ username: id, name, role: 'Admin' });
   }
 
   /** Returns true on success; false for unknown user / wrong PIN / disabled. */
   async login(username: string, pin: string): Promise<boolean> {
-    const id = username.trim().toLowerCase();
-    if (!id || !pin) return false;
-
-    const snap = await getDoc(doc(db, 'users', id));
-    if (!snap.exists()) return false;
-
-    const data = snap.data();
-    if (data['active'] === false) return false;
-    if (data['pinHash'] !== (await hashPin(pin))) return false;
-
-    this.persist({
-      username: id,
-      name: (data['name'] as string) || id,
-      role: (data['role'] as Role) || 'Operator',
-    });
-    return true;
+    try {
+      this.tokens.set(await this.api.post<LoginResponse>('/auth/login', { username, pin }));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   logout(): void {
-    this.currentUser.set(null);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
+    this.tokens.clear();
   }
 }

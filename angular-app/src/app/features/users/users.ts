@@ -4,13 +4,12 @@ import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { SessionService } from '../../core/session.service';
 import { UsersService } from '../../core/users.service';
-import { EmptyState } from '../../shared/empty-state/empty-state';
 import { ROLE_OPTIONS, type Role } from '../../core/models';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [FormsModule, TPipe, EmptyState],
+  imports: [FormsModule, TPipe],
   templateUrl: './users.html',
 })
 export class Users implements OnInit {
@@ -52,7 +51,13 @@ export class Users implements OnInit {
       this.takenError.set(true);
       return;
     }
-    await this.usersService.addUser(f);
+    try {
+      await this.usersService.addUser(f);
+    } catch {
+      // The server checks the username too, against the whole collection.
+      this.takenError.set(true);
+      return;
+    }
     this.form.set({ username: '', name: '', pin: '', role: 'Operator' });
   }
 
@@ -71,17 +76,7 @@ export class Users implements OnInit {
     });
   }
 
-  toggleActive(username: string, active: boolean): void {
-    void this.usersService.setActive(username, active);
-  }
-
   changeRole(username: string, role: string): void {
     void this.usersService.setRole(username, role as Role);
-  }
-
-  async remove(username: string): Promise<void> {
-    if (username === this.session.currentUser()?.username) return;
-    if (!confirm(`Delete user "${username}"?`)) return;
-    await this.usersService.remove(username);
   }
 }

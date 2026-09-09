@@ -36,7 +36,13 @@ export class Parties implements OnInit {
       this.takenError.set(true);
       return;
     }
-    await this.partiesService.addParty(n);
+    try {
+      await this.partiesService.addParty(n);
+    } catch {
+      // The server rejects duplicates too, checked against the whole collection.
+      this.takenError.set(true);
+      return;
+    }
     this.name.set('');
   }
 

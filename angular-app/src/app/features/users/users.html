@@ -1,99 +1,75 @@
 <section class="page-stack">
-  @if (!session.isAdmin()) {
-    <div class="panel-card">
-      <app-empty-state [title]="'nav.users' | t" [message]="'users.noAccess' | t" />
+  <div class="panel-card">
+    <div class="panel-header"><h3>{{ 'users.add' | t }}</h3></div>
+    <div class="wizard-grid">
+      <div class="field-group">
+        <label class="field-label">{{ 'users.username' | t }}</label>
+        <input autocapitalize="none" [ngModel]="form().username" (ngModelChange)="patch('username', $event)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">{{ 'users.name' | t }}</label>
+        <input [ngModel]="form().name" (ngModelChange)="patch('name', $event)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">{{ 'users.pin' | t }}</label>
+        <input inputmode="numeric" maxlength="6" [ngModel]="form().pin" (ngModelChange)="patch('pin', $event)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">{{ 'users.role' | t }}</label>
+        <select [ngModel]="form().role" (ngModelChange)="patch('role', $event)">
+          @for (r of roles; track r) {
+            <option [value]="r">{{ 'role.' + r | t }}</option>
+          }
+        </select>
+      </div>
     </div>
-  } @else {
-    <div class="panel-card">
-      <div class="panel-header"><h3>{{ 'users.add' | t }}</h3></div>
-      <div class="wizard-grid">
-        <div class="field-group">
-          <label class="field-label">{{ 'users.username' | t }}</label>
-          <input autocapitalize="none" [ngModel]="form().username" (ngModelChange)="patch('username', $event)" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">{{ 'users.name' | t }}</label>
-          <input [ngModel]="form().name" (ngModelChange)="patch('name', $event)" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">{{ 'users.pin' | t }}</label>
-          <input inputmode="numeric" maxlength="6" [ngModel]="form().pin" (ngModelChange)="patch('pin', $event)" />
-        </div>
-        <div class="field-group">
-          <label class="field-label">{{ 'users.role' | t }}</label>
-          <select [ngModel]="form().role" (ngModelChange)="patch('role', $event)">
-            @for (r of roles; track r) {
-              <option [value]="r">{{ 'role.' + r | t }}</option>
+    @if (takenError()) {
+      <div class="login-error">{{ 'users.taken' | t }}</div>
+    }
+    <div class="inline-actions top-gap">
+      <button type="button" class="primary-button small" [disabled]="!canAdd()" (click)="add()">
+        {{ 'users.add' | t }}
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3>{{ 'page.users' | t }}</h3></div>
+    <div class="user-list">
+      @for (u of users(); track u.username) {
+        <div class="user-row" [class.disabled]="!u.active">
+          <div class="user-main">
+            <strong>{{ u.name }}</strong>
+            <span class="user-uname">@{{ u.username }}</span>
+            @if (u.username === session.currentUser()?.username) {
+              <span class="user-you">{{ 'users.you' | t }}</span>
             }
-          </select>
-        </div>
-      </div>
-      @if (takenError()) {
-        <div class="login-error">{{ 'users.taken' | t }}</div>
-      }
-      <div class="inline-actions top-gap">
-        <button type="button" class="primary-button small" [disabled]="!canAdd()" (click)="add()">
-          {{ 'users.add' | t }}
-        </button>
-      </div>
-    </div>
+          </div>
 
-    <div class="panel-card">
-      <div class="panel-header"><h3>{{ 'page.users' | t }}</h3></div>
-      <div class="user-list">
-        @for (u of users(); track u.username) {
-          <div class="user-row" [class.disabled]="!u.active">
-            <div class="user-main">
-              <strong>{{ u.name }}</strong>
-              <span class="user-uname">@{{ u.username }}</span>
-              @if (u.username === session.currentUser()?.username) {
-                <span class="user-you">{{ 'users.you' | t }}</span>
+          <div class="user-controls">
+            <select [ngModel]="u.role" (ngModelChange)="changeRole(u.username, $event)">
+              @for (r of roles; track r) {
+                <option [value]="r">{{ 'role.' + r | t }}</option>
               }
-            </div>
+            </select>
 
-            <div class="user-controls">
-              <select [ngModel]="u.role" (ngModelChange)="changeRole(u.username, $event)">
-                @for (r of roles; track r) {
-                  <option [value]="r">{{ 'role.' + r | t }}</option>
-                }
-              </select>
-
-              <div class="inline-field">
-                <input
-                  class="pin-input"
-                  inputmode="numeric"
-                  maxlength="6"
-                  [placeholder]="'users.newPin' | t"
-                  [ngModel]="pinEdits()[u.username] || ''"
-                  (ngModelChange)="setPinEdit(u.username, $event)"
-                />
-                <button type="button" class="ghost-button small" (click)="savePin(u.username)">
-                  {{ 'users.save' | t }}
-                </button>
-              </div>
-
-              @if (u.active) {
-                <button type="button" class="ghost-button small" (click)="toggleActive(u.username, false)">
-                  {{ 'users.deactivate' | t }}
-                </button>
-              } @else {
-                <button type="button" class="ghost-button small" (click)="toggleActive(u.username, true)">
-                  {{ 'users.activate' | t }}
-                </button>
-              }
-
-              <button
-                type="button"
-                class="danger-button small"
-                [disabled]="u.username === session.currentUser()?.username"
-                (click)="remove(u.username)"
-              >
-                {{ 'users.delete' | t }}
+            <div class="inline-field">
+              <input
+                class="pin-input"
+                inputmode="numeric"
+                maxlength="6"
+                [placeholder]="'users.newPin' | t"
+                [ngModel]="pinEdits()[u.username] || ''"
+                (ngModelChange)="setPinEdit(u.username, $event)"
+              />
+              <button type="button" class="ghost-button small" (click)="savePin(u.username)">
+                {{ 'users.save' | t }}
               </button>
             </div>
+
           </div>
-        }
-      </div>
+        </div>
+      }
     </div>
-  }
+  </div>
 </section>
