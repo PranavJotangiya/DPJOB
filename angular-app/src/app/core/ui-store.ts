@@ -22,6 +22,10 @@ export class UiStore {
     this.selectedLotId.set(id);
   }
 
+  clearSelectedLot(): void {
+    this.selectedLotId.set(null);
+  }
+
   showMessage(message: string): void {
     this.statusMessage.set(message);
   }

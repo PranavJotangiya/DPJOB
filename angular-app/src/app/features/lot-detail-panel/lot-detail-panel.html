@@ -1,5 +1,8 @@
 @if (visible()) {
-  <div class="floating-detail">
+  <div class="detail-backdrop" (click)="close()"></div>
+  <div class="floating-detail" role="dialog" aria-modal="true">
+    <button type="button" class="detail-grabber" (click)="close()" [attr.aria-label]="'btn.close' | t"></button>
+    <button type="button" class="detail-close" (click)="close()" [attr.aria-label]="'btn.close' | t">✕</button>
     <div class="detail-header">
       <div>
         <p class="eyebrow">{{ 'detail.selectedLot' | t }}</p>

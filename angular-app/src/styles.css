@@ -983,6 +983,7 @@ tbody tr:last-child td { border-bottom: 0; }
    ============================================================ */
 
 .floating-detail {
+  position: relative;
   background: var(--data-dark);
   border: 0;
   border-radius: var(--r-md);
@@ -992,12 +993,81 @@ tbody tr:last-child td { border-bottom: 0; }
   margin-top: 16px;
 }
 
+/* Backdrop + grab handle only matter for the mobile bottom-sheet form. */
+.detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(10, 12, 16, 0.5);
+  animation: detail-fade 0.2s ease;
+}
+.detail-grabber {
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: -4px auto 10px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--on-dark-2);
+  cursor: pointer;
+}
+.detail-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--on-dark-btn-line);
+  border-radius: 50%;
+  background: var(--on-dark-btn);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.detail-close:hover { background: rgba(255, 255, 255, 0.16); }
+
+@keyframes detail-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes detail-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Mobile / tablet: the panel is a bottom sheet that slides up over the list. */
+@media (max-width: 1023px) {
+  .floating-detail {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    margin-top: 0;
+    max-height: 88dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    padding: 12px 16px calc(20px + var(--safe-b));
+    animation: detail-sheet-up 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+/* Desktop: in-flow panel below the list — no backdrop, no grab handle. */
+@media (min-width: 1024px) {
+  .detail-backdrop,
+  .detail-grabber { display: none; }
+}
+
 .detail-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+  padding-right: 40px;
   margin-bottom: 14px;
 }
 .detail-header .eyebrow { color: var(--on-dark-2); }
