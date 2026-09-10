@@ -54,7 +54,7 @@ export class LotDetailPanel {
     if (lot) void this.router.navigateByUrl(`/lots/${lot.id}/edit`);
   }
 
-  setStatus(status: 'Ready' | 'Cutting' | 'Completed'): void {
+  setStatus(status: 'Completed'): void {
     const lot = this.lot();
     if (lot) void this.lotsService.updateStatus(lot.id, status);
   }
