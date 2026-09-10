@@ -74,11 +74,13 @@ usersRouter.post(
     const b = (req.body ?? {}) as Record<string, unknown>;
     const username = str(b['username']).trim().toLowerCase();
     const pin = str(b['pin']).trim();
-    const role = b['role'];
+    // Role is no longer surfaced in the app; accept it if a caller still sends a
+    // valid one, otherwise fall back to a neutral default. It has no effect on
+    // access — being signed in is the only thing that gates anything.
+    const role: Role = validRole(b['role']) ? b['role'] : 'Operator';
 
     if (!username) throw badRequest('Username is required');
     if (!validPin(pin)) throw badRequest('PIN must be 4-8 digits');
-    if (!validRole(role)) throw badRequest('Unknown role');
     if ((await usersCol.doc(username).get()).exists) throw badRequest('That username is taken');
 
     await usersCol.doc(username).set({

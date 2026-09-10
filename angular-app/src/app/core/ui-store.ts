@@ -1,15 +1,13 @@
 import { Injectable, signal } from '@angular/core';
-import type { Role } from './models';
 
 /**
- * Small piece of shared UI state that doesn't belong to routing: the active
- * role, which lot is "selected" for the floating detail panel, and the
- * current section (used to decide when to show that panel — it hides on the
- * dashboard and on the New/Edit Lot pages, same as the original app).
+ * Small piece of shared UI state that doesn't belong to routing: which lot is
+ * "selected" for the floating detail panel, and the current section (used to
+ * decide when to show that panel — it hides on the dashboard and on the
+ * New/Edit Lot pages, same as the original app).
  */
 @Injectable({ providedIn: 'root' })
 export class UiStore {
-  readonly role = signal<Role>('Supervisor');
   readonly moreOpen = signal(false);
   readonly statusMessage = signal('');
   readonly currentSection = signal<string>('dashboard');

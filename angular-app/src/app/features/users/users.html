@@ -14,14 +14,6 @@
         <label class="field-label">{{ 'users.pin' | t }}</label>
         <input inputmode="numeric" maxlength="6" [ngModel]="form().pin" (ngModelChange)="patch('pin', $event)" />
       </div>
-      <div class="field-group">
-        <label class="field-label">{{ 'users.role' | t }}</label>
-        <select [ngModel]="form().role" (ngModelChange)="patch('role', $event)">
-          @for (r of roles; track r) {
-            <option [value]="r">{{ 'role.' + r | t }}</option>
-          }
-        </select>
-      </div>
     </div>
     @if (takenError()) {
       <div class="login-error">{{ 'users.taken' | t }}</div>
@@ -47,12 +39,6 @@
           </div>
 
           <div class="user-controls">
-            <select [ngModel]="u.role" (ngModelChange)="changeRole(u.username, $event)">
-              @for (r of roles; track r) {
-                <option [value]="r">{{ 'role.' + r | t }}</option>
-              }
-            </select>
-
             <div class="inline-field">
               <input
                 class="pin-input"

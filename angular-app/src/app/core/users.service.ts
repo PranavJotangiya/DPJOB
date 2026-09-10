@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiService } from './api';
 import { liveCollection } from './live-collection';
-import type { AppUser, Role } from './models';
+import type { AppUser } from './models';
 
 /**
  * The account page. The API only ever returns the signed-in user's own record,
@@ -25,20 +25,15 @@ export class UsersService {
     return this.users().some((u) => u.username === id);
   }
 
-  async addUser(input: { username: string; name: string; pin: string; role: Role }): Promise<void> {
+  async addUser(input: { username: string; name: string; pin: string }): Promise<void> {
     await this.api.post<{ username: string }>('/users', {
       username: input.username.trim().toLowerCase(),
       name: input.name.trim(),
       pin: input.pin,
-      role: input.role,
     });
   }
 
   async setPin(username: string, pin: string): Promise<void> {
     await this.api.patch<{ username: string }>(`/users/${username}`, { pin });
-  }
-
-  async setRole(username: string, role: Role): Promise<void> {
-    await this.api.patch<{ username: string }>(`/users/${username}`, { role });
   }
 }

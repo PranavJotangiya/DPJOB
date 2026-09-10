@@ -3,7 +3,7 @@
     <div class="panel-card">
       <h3>{{ 'login.title' | t }}</h3>
       <div class="settings-row">
-        <label>{{ session.currentUser()?.name }} · {{ 'role.' + (session.currentUser()?.role || 'Operator') | t }}</label>
+        <label>{{ session.currentUser()?.name }}</label>
         <button type="button" class="danger-button small" (click)="logout()">{{ 'btn.logout' | t }}</button>
       </div>
     </div>

@@ -4,7 +4,6 @@ import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { SessionService } from '../../core/session.service';
 import { UsersService } from '../../core/users.service';
-import { ROLE_OPTIONS, type Role } from '../../core/models';
 
 @Component({
   selector: 'app-users',
@@ -17,14 +16,12 @@ export class Users implements OnInit {
   readonly session = inject(SessionService);
   readonly usersService = inject(UsersService);
 
-  readonly roles = ROLE_OPTIONS;
   readonly users = this.usersService.users;
 
-  readonly form = signal<{ username: string; name: string; pin: string; role: Role }>({
+  readonly form = signal<{ username: string; name: string; pin: string }>({
     username: '',
     name: '',
     pin: '',
-    role: 'Operator',
   });
   readonly takenError = signal(false);
 
@@ -39,8 +36,8 @@ export class Users implements OnInit {
     this.ui.setSection('users');
   }
 
-  patch<K extends 'username' | 'name' | 'pin' | 'role'>(key: K, value: string): void {
-    this.form.update((f) => ({ ...f, [key]: key === 'role' ? (value as Role) : value }));
+  patch<K extends 'username' | 'name' | 'pin'>(key: K, value: string): void {
+    this.form.update((f) => ({ ...f, [key]: value }));
     this.takenError.set(false);
   }
 
@@ -58,7 +55,7 @@ export class Users implements OnInit {
       this.takenError.set(true);
       return;
     }
-    this.form.set({ username: '', name: '', pin: '', role: 'Operator' });
+    this.form.set({ username: '', name: '', pin: '' });
   }
 
   setPinEdit(username: string, value: string): void {
@@ -74,9 +71,5 @@ export class Users implements OnInit {
       delete next[username];
       return next;
     });
-  }
-
-  changeRole(username: string, role: string): void {
-    void this.usersService.setRole(username, role as Role);
   }
 }
