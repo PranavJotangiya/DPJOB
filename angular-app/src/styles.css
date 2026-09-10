@@ -412,6 +412,8 @@ h1, h2, h3, h4 {
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
+/* Odd tile out on a 2-col phone layout spans the row instead of leaving a gap. */
+.summary-grid > .stat-card.slate { grid-column: 1 / -1; }
 
 .mini-grid {
   display: grid;
@@ -1715,7 +1717,8 @@ tbody tr:last-child td { border-bottom: 0; }
 
 @media (min-width: 768px) {
   .content-panel { padding: 22px 22px calc(96px + var(--safe-b)); }
-  .summary-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .summary-grid > .stat-card.slate { grid-column: auto; }
   .mini-grid { grid-template-columns: repeat(4, 1fr); }
   .toolbar { flex-direction: row; align-items: center; }
   .toolbar input[type="search"] { max-width: 380px; }
@@ -1798,7 +1801,7 @@ tbody tr:last-child td { border-bottom: 0; }
 
   .content-panel { padding: 26px 30px 40px; }
   .topbar-actions .ghost-button { display: inline-flex; }
-  .summary-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .lot-detail-grid { grid-template-columns: repeat(4, 1fr); }
 
   /* Give the tiles more presence on wide screens so they don't read as empty. */
@@ -1853,7 +1856,7 @@ tbody tr:last-child td { border-bottom: 0; }
 }
 
 @media (min-width: 1600px) {
-  .summary-grid { grid-template-columns: repeat(4, 1fr); }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* ============================================================

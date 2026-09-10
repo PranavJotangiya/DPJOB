@@ -38,7 +38,6 @@ export class Dashboard implements OnInit {
     const lots = this.lots();
     return {
       activeLots: lots.filter((l) => l.status !== 'Completed').length,
-      pendingCutting: lots.filter((l) => ['Draft', 'Ready'].includes(l.status)).length,
       completedLots: lots.filter((l) => l.status === 'Completed').length,
       totalFabricUsed: lots.reduce((sum, l) => sum + Number(l.totalMeters || 0), 0),
       totalPieces: lots.reduce((sum, l) => sum + Number(l.totalPieces || 0), 0),

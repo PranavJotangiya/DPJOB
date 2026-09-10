@@ -11,7 +11,6 @@
 
   <div class="summary-grid">
     <app-stat-card icon="📦" [label]="'stat.activeLots' | t" [value]="stats().activeLots" tone="blue" />
-    <app-stat-card icon="✂️" [label]="'stat.pendingCutting' | t" [value]="stats().pendingCutting" tone="amber" />
     <app-stat-card icon="✔️" [label]="'stat.completedLots' | t" [value]="stats().completedLots" tone="green" />
     <app-stat-card icon="🧵" [label]="'stat.totalFabric' | t" [value]="stats().totalFabricUsed + ' MTR'" tone="slate" />
     <app-stat-card [hero]="true" icon="🧺" [label]="'stat.totalPieces' | t" [value]="stats().totalPieces" tone="blue" />
