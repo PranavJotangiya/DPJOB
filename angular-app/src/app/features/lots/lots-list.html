@@ -38,8 +38,8 @@
               <th>{{ 'col.party' | t }}</th>
               <th>{{ 'col.shortNo' | t }}</th>
               <th>{{ 'col.supplier' | t }}</th>
-              <th>{{ 'col.mtr' | t }}</th>
-              <th>{{ 'col.pcs' | t }}</th>
+              <th class="num">{{ 'col.mtr' | t }}</th>
+              <th class="num">{{ 'col.pcs' | t }}</th>
               <th>{{ 'col.cuttingDate' | t }}</th>
               <th>{{ 'col.status' | t }}</th>
               <th>{{ 'col.createdBy' | t }}</th>
@@ -53,8 +53,8 @@
                 <td>{{ lot.party || '—' }}</td>
                 <td>{{ lot.shortNumber || '—' }}</td>
                 <td>{{ lot.supplier || '—' }}</td>
-                <td>{{ lot.totalMeters }}</td>
-                <td>{{ lot.totalPieces }}</td>
+                <td class="num">{{ lot.totalMeters }}</td>
+                <td class="num">{{ lot.totalPieces }}</td>
                 <td>{{ lot.cuttingDate || '—' }}</td>
                 <td><app-status-badge [status]="lot.status" /></td>
                 <td>{{ lot.createdBy || '—' }}</td>

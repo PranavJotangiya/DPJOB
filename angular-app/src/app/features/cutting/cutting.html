@@ -20,7 +20,7 @@
               <th>{{ 'col.lot' | t }}</th>
               <th>{{ 'col.shortNo' | t }}</th>
               <th>{{ 'col.fabric' | t }}</th>
-              <th>{{ 'col.qty' | t }}</th>
+              <th class="num">{{ 'col.qty' | t }}</th>
               <th>{{ 'col.cutDate' | t }}</th>
               <th>{{ 'col.status' | t }}</th>
               <th>{{ 'col.action' | t }}</th>
@@ -32,7 +32,7 @@
                 <td [attr.data-label]="'col.lot' | t">{{ lot.lotNumber }}</td>
                 <td [attr.data-label]="'col.shortNo' | t">{{ lot.shortNumber }}</td>
                 <td [attr.data-label]="'col.fabric' | t">{{ lot.fabricType }}</td>
-                <td [attr.data-label]="'col.qty' | t">{{ lot.totalPieces }}</td>
+                <td class="num" [attr.data-label]="'col.qty' | t">{{ lot.totalPieces }}</td>
                 <td [attr.data-label]="'col.cutDate' | t">{{ lot.cuttingDate }}</td>
                 <td [attr.data-label]="'col.status' | t"><app-status-badge [status]="lot.status" /></td>
                 <td [attr.data-label]="'col.action' | t" class="cell-actions">

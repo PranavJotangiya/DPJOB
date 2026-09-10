@@ -14,14 +14,14 @@
         <thead>
           <tr>
             <th>{{ 'f.baleNo' | t }}</th>
-            <th>{{ 'col.meter' | t }}</th>
+            <th class="num">{{ 'col.meter' | t }}</th>
           </tr>
         </thead>
         <tbody>
           @for (bale of selectedLot()?.bales || []; track bale.id) {
             <tr>
               <td [attr.data-label]="'f.baleNo' | t">{{ bale.baleNumber }}</td>
-              <td [attr.data-label]="'col.meter' | t">{{ bale.meters }}</td>
+              <td class="num" [attr.data-label]="'col.meter' | t">{{ bale.meters }}</td>
             </tr>
           }
         </tbody>

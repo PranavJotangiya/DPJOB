@@ -10,7 +10,6 @@ import { StatusBadge } from '../../shared/status-badge/status-badge';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { SkeletonRows } from '../../shared/skeleton-rows/skeleton-rows';
 
-const TODAY = new Date().toISOString().slice(0, 10);
 const PARTY_KEY = 'dp-dash-party';
 
 @Component({
@@ -39,7 +38,6 @@ export class Dashboard implements OnInit {
     const lots = this.lots();
     return {
       activeLots: lots.filter((l) => l.status !== 'Completed').length,
-      todaysCutting: lots.filter((l) => l.cuttingDate === TODAY).length,
       pendingCutting: lots.filter((l) => ['Draft', 'Ready'].includes(l.status)).length,
       completedLots: lots.filter((l) => l.status === 'Completed').length,
       totalFabricUsed: lots.reduce((sum, l) => sum + Number(l.totalMeters || 0), 0),
