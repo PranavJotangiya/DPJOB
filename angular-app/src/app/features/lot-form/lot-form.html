@@ -218,7 +218,14 @@
           <div class="field-group full-width">
             <label class="field-label">{{ 'f.patternImage' | t }}</label>
             <div class="inline-actions">
-              <input type="file" accept="image/*" capture="environment" (change)="onPatternImage($event)" />
+              <label class="ghost-button small file-btn">
+                {{ 'pattern.choose' | t }}
+                <input type="file" accept="image/*" (change)="onPatternImage($event)" />
+              </label>
+              <label class="ghost-button small file-btn">
+                {{ 'pattern.camera' | t }}
+                <input type="file" accept="image/*" capture="environment" (change)="onPatternImage($event)" />
+              </label>
               <button type="button" class="ghost-button small" (click)="drawOpen.set(true)">
                 {{ 'pattern.draw' | t }}
               </button>
