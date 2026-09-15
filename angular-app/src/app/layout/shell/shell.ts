@@ -36,9 +36,15 @@ const BN_ICONS: Record<string, string> = {
   settings: '⚙️',
 };
 
-// newLot sits in the middle so its round "+" button is centered in the bar.
-const PRIMARY_NAV = ['dashboard', 'lots', 'newLot', 'parties'];
-const MORE_NAV = ['bale', 'reports', 'sharedLots', 'users', 'settings'];
+// The primary row's most useful slot differs by account type: a Jobber's
+// day-to-day actions are dashboard/lots/new-lot/"Add Party"; a Party doesn't
+// file job cards or keep its own party list, so "Add Jobber" (shared-lots)
+// takes that spot instead. newLot sits in the middle for a Jobber so its
+// round "+" button is centered in the bar.
+const PRIMARY_NAV_JOBBER = ['dashboard', 'lots', 'newLot', 'parties'];
+const PRIMARY_NAV_PARTY = ['dashboard', 'lots', 'sharedLots'];
+const MORE_NAV_JOBBER = ['bale', 'reports', 'sharedLots', 'users', 'settings'];
+const MORE_NAV_PARTY = ['bale', 'reports', 'parties', 'users', 'settings'];
 
 @Component({
   selector: 'app-shell',
@@ -59,16 +65,18 @@ export class Shell {
     this.session.isParty() ? NAV_ITEMS.filter((n) => n.id !== 'newLot') : NAV_ITEMS,
   );
   readonly navItems = this.visibleItems;
-  readonly primaryNav = computed(() =>
-    PRIMARY_NAV.map((id) => this.visibleItems().find((n) => n.id === id)).filter(
-      (n): n is NavItem => !!n,
-    ),
-  );
-  readonly moreNav = computed(() =>
-    MORE_NAV.map((id) => this.visibleItems().find((n) => n.id === id)).filter(
-      (n): n is NavItem => !!n,
-    ),
-  );
+  readonly primaryNav = computed(() => {
+    const ids = this.session.isParty() ? PRIMARY_NAV_PARTY : PRIMARY_NAV_JOBBER;
+    return ids
+      .map((id) => this.visibleItems().find((n) => n.id === id))
+      .filter((n): n is NavItem => !!n);
+  });
+  readonly moreNav = computed(() => {
+    const ids = this.session.isParty() ? MORE_NAV_PARTY : MORE_NAV_JOBBER;
+    return ids
+      .map((id) => this.visibleItems().find((n) => n.id === id))
+      .filter((n): n is NavItem => !!n);
+  });
 
   onLangChange(event: Event): void {
     this.i18n.setLang((event.target as HTMLSelectElement).value as LangCode);
