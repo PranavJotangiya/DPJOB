@@ -1,10 +1,10 @@
 <section class="page-stack">
   <div class="dash-party">
-    <label class="field-label">{{ 'f.party' | t }}</label>
-    <select [ngModel]="party()" (ngModelChange)="setParty($event)">
-      <option value="">{{ 'party.all' | t }}</option>
-      @for (p of partyNames(); track p) {
-        <option [value]="p">{{ p }}</option>
+    <label class="field-label">{{ (isParty() ? 'signup.jobber' : 'f.party') | t }}</label>
+    <select [ngModel]="filterValue()" (ngModelChange)="setFilter($event)">
+      <option value="">{{ (isParty() ? 'dash.allJobbers' : 'party.all') | t }}</option>
+      @for (opt of filterOptions(); track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
       }
     </select>
   </div>
@@ -22,14 +22,18 @@
       <button type="button" class="ghost-button small">{{ 'btn.export' | t }}</button>
     </div>
 
-    @if (!lotsService.ready()) {
+    @if (!ready()) {
       <app-skeleton-rows [rows]="5" />
     } @else if (lots().length === 0) {
-      <app-empty-state [title]="'empty.noLotsTitle' | t" [message]="'empty.noLotsDash' | t">
-        @if (!session.isParty()) {
+      @if (isParty()) {
+        <app-empty-state [title]="'nav.sharedLots' | t" [message]="'shared.none' | t">
+          <a class="primary-button" routerLink="/shared-lots">{{ 'shared.addJobber' | t }}</a>
+        </app-empty-state>
+      } @else {
+        <app-empty-state [title]="'empty.noLotsTitle' | t" [message]="'empty.noLotsDash' | t">
           <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
-        }
-      </app-empty-state>
+        </app-empty-state>
+      }
     } @else {
       <div class="cut-list">
         @for (lot of today5(); track lot.id) {
