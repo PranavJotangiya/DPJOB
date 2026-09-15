@@ -1,0 +1,162 @@
+<section class="page-stack">
+  <div class="panel-card">
+    <div class="panel-header"><h3>{{ 'shared.addJobber' | t }}</h3></div>
+    <div class="inline-field">
+      <input
+        type="tel"
+        inputmode="numeric"
+        maxlength="10"
+        [placeholder]="'shared.jobberPhonePh' | t"
+        [ngModel]="phone()"
+        (ngModelChange)="setPhone($event)"
+        (keyup.enter)="addJobber()"
+      />
+      <button
+        type="button"
+        class="primary-button small"
+        [disabled]="phone().length !== 10 || phoneLookup() === 'self'"
+        (click)="addJobber()"
+      >
+        {{ 'shared.addJobberBtn' | t }}
+      </button>
+    </div>
+    @if (phoneLookup() === 'checking') {
+      <small class="field-hint">{{ 'party.phoneChecking' | t }}</small>
+    } @else if (phoneLookup() === 'self') {
+      <small class="field-hint">{{ 'party.phoneSelf' | t }}</small>
+    } @else if (phoneLookup() === 'notfound') {
+      <small class="field-hint">{{ 'party.phoneNotFound' | t }}</small>
+    } @else if (phoneLookup() !== 'idle') {
+      <small class="field-hint">✓ {{ 'party.phoneFoundPrefix' | t }} {{ phoneLookup() }}</small>
+    }
+    @if (addError()) {
+      <div class="login-error">{{ 'party.phoneNotFound' | t }}</div>
+    }
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3>{{ 'nav.sharedLots' | t }}</h3></div>
+    @if (jobbers().length === 0) {
+      <p class="section-hint">{{ 'shared.jobberNone' | t }}</p>
+    } @else {
+      <div class="user-list">
+        @for (j of jobbers(); track j.username) {
+          <div class="user-row">
+            <div class="user-main">
+              <strong>{{ j.name }}</strong>
+              <span class="user-uname">{{ j.username }}</span>
+            </div>
+            <div class="user-controls">
+              <button type="button" class="danger-button small" (click)="removeJobber(j.username)">
+                {{ 'shared.removeJobber' | t }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="dash-section">
+    <div class="dash-section-head">
+      <h3>{{ 'page.sharedLots' | t }}</h3>
+      <button type="button" class="ghost-button small" (click)="refresh()">{{ 'shared.refresh' | t }}</button>
+    </div>
+
+    @if (!ready()) {
+      <app-skeleton-rows [rows]="4" />
+    } @else if (sharedLots().length === 0) {
+      <app-empty-state [title]="'nav.sharedLots' | t" [message]="'shared.none' | t" />
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'col.lotNo' | t }}</th>
+              <th>{{ 'shared.sharedBy' | t }}</th>
+              <th>{{ 'col.fabric' | t }}</th>
+              <th class="num">{{ 'col.pieces' | t }}</th>
+              <th class="num">{{ 'col.meter' | t }}</th>
+              <th>{{ 'col.status' | t }}</th>
+              <th>{{ 'col.action' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lot of sharedLots(); track lot.id) {
+              <tr>
+                <td [attr.data-label]="'col.lotNo' | t">{{ lot.lotNumber }}</td>
+                <td [attr.data-label]="'shared.sharedBy' | t">{{ lot.sharedBy.name }}</td>
+                <td [attr.data-label]="'col.fabric' | t">{{ lot.fabricType }}</td>
+                <td class="num" [attr.data-label]="'col.pieces' | t">{{ lot.totalPieces }}</td>
+                <td class="num" [attr.data-label]="'col.meter' | t">{{ lot.totalMeters }}</td>
+                <td [attr.data-label]="'col.status' | t"><app-status-badge [status]="lot.status" /></td>
+                <td [attr.data-label]="'col.action' | t" class="cell-actions">
+                  <button type="button" class="table-action" (click)="open(lot)">{{ 'btn.detail' | t }}</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+@if (selected(); as lot) {
+  <div class="detail-backdrop" (click)="close()"></div>
+  <div class="floating-detail" role="dialog" aria-modal="true">
+    <button type="button" class="detail-grabber" (click)="close()" [attr.aria-label]="'btn.close' | t"></button>
+    <button type="button" class="detail-close" (click)="close()" [attr.aria-label]="'btn.close' | t">✕</button>
+    <div class="detail-header">
+      <div>
+        <p class="eyebrow">{{ 'shared.sharedBy' | t }} {{ lot.sharedBy.name }}</p>
+        <h3>{{ lot.lotNumber }}</h3>
+      </div>
+      <div class="detail-actions">
+        <span class="status-badge readonly-badge">{{ 'shared.readOnly' | t }}</span>
+        <button type="button" class="ghost-button small" (click)="print(lot)">{{ 'btn.print' | t }}</button>
+        <button type="button" class="primary-button small" (click)="share(lot)">{{ 'btn.share' | t }}</button>
+      </div>
+    </div>
+
+    <div class="lot-detail-grid">
+      <div class="detail-card">
+        <h4>{{ 'detail.lotInfo' | t }}</h4>
+        <div class="key-value"><span>{{ 'detail.lotNo' | t }}</span><strong>{{ lot.lotNumber }}</strong></div>
+        <div class="key-value"><span>{{ 'f.party' | t }}</span><strong>{{ lot.party || '—' }}</strong></div>
+        <div class="key-value"><span>{{ 'detail.status' | t }}</span><app-status-badge [status]="lot.status" /></div>
+        <div class="key-value"><span>{{ 'detail.program' | t }}</span><strong>{{ lot.programDate }}</strong></div>
+        <div class="key-value"><span>{{ 'detail.cutDate' | t }}</span><strong>{{ lot.cuttingDate }}</strong></div>
+      </div>
+
+      <div class="detail-card">
+        <h4>{{ 'detail.fabricInfo' | t }}</h4>
+        <div class="key-value"><span>{{ 'detail.supplier' | t }}</span><strong>{{ lot.supplier }}</strong></div>
+        <div class="key-value"><span>{{ 'f.shortNo' | t }}</span><strong>{{ lot.shortNumber }}</strong></div>
+        <div class="key-value"><span>{{ 'f.shortName' | t }}</span><strong>{{ lot.shortName || '—' }}</strong></div>
+        <div class="key-value"><span>{{ 'detail.type' | t }}</span><strong>{{ lot.fabricType }}</strong></div>
+        <div class="key-value"><span>{{ 'detail.color' | t }}</span><strong>{{ lot.color }}</strong></div>
+      </div>
+
+      <div class="detail-card highlight">
+        <h4>{{ 'detail.fabricMetrics' | t }}</h4>
+        <div class="key-value"><span>MTR</span><strong>{{ lot.totalMeters }}</strong></div>
+        <div class="key-value"><span>PCS</span><strong>{{ lot.totalPieces }}</strong></div>
+        <div class="key-value"><span>PANA</span><strong>{{ lot.pana }}</strong></div>
+        <div class="key-value"><span>AVG</span><strong>{{ lot.averageConsumption }}</strong></div>
+      </div>
+
+      <div class="detail-card">
+        <h4>{{ 'detail.notes' | t }}</h4>
+        <p>{{ lot.notes }}</p>
+      </div>
+
+      @if (lot.patternImage) {
+        <div class="detail-card detail-card-wide">
+          <h4>{{ 'f.patternImage' | t }}</h4>
+          <img class="detail-pattern" [src]="lot.patternImage" alt="pattern" />
+        </div>
+      }
+    </div>
+  </div>
+}

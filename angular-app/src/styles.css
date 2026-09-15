@@ -893,6 +893,8 @@ tbody tr:last-child td { border-bottom: 0; }
 .status-badge.pending { background: var(--st-ready-bg); color: var(--st-ready-fg); }
 .status-badge.cutting { background: var(--st-cutting-bg); color: var(--st-cutting-fg); }
 .status-badge.completed { background: var(--st-completed-bg); color: var(--st-completed-fg); }
+/* A plain informational pill (e.g. "read-only, shared with you") — not a lot status. */
+.status-badge.readonly-badge { background: var(--tile-neutral-bg); color: var(--tile-neutral-fg); }
 
 /* ============================================================
    Banners

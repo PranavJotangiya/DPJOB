@@ -9,10 +9,37 @@
         (ngModelChange)="setName($event)"
         (keyup.enter)="add()"
       />
-      <button type="button" class="primary-button small" [disabled]="!name().trim()" (click)="add()">
+      <button
+        type="button"
+        class="primary-button small"
+        [disabled]="!name().trim() || phoneLookup() === 'self'"
+        (click)="add()"
+      >
         {{ 'party.add' | t }}
       </button>
     </div>
+
+    <div class="field-group top-gap">
+      <label class="field-label">{{ 'party.phone' | t }}</label>
+      <input
+        type="tel"
+        inputmode="numeric"
+        maxlength="10"
+        [placeholder]="'fh.mobile' | t"
+        [ngModel]="phone()"
+        (ngModelChange)="setPhone($event)"
+      />
+      @if (phoneLookup() === 'checking') {
+        <small class="field-hint">{{ 'party.phoneChecking' | t }}</small>
+      } @else if (phoneLookup() === 'self') {
+        <small class="field-hint">{{ 'party.phoneSelf' | t }}</small>
+      } @else if (phoneLookup() === 'notfound') {
+        <small class="field-hint">{{ 'party.phoneNotFound' | t }}</small>
+      } @else if (phoneLookup() !== 'idle') {
+        <small class="field-hint">✓ {{ 'party.phoneFoundPrefix' | t }} {{ phoneLookup() }}</small>
+      }
+    </div>
+
     @if (takenError()) {
       <div class="login-error">{{ 'party.taken' | t }}</div>
     }
@@ -29,12 +56,43 @@
             <div class="user-main">
               <strong>{{ p.name }}</strong>
               <span class="user-uname">{{ lotCount(p.name) }} {{ 'nav.lots' | t }}</span>
+              @if (p.phone) {
+                <span class="user-you">🔗 {{ p.phone }}</span>
+              }
             </div>
             <div class="user-controls">
+              <div class="inline-field">
+                <input
+                  class="pin-input"
+                  type="tel"
+                  inputmode="numeric"
+                  maxlength="10"
+                  [placeholder]="'party.phone' | t"
+                  [ngModel]="phoneEdits()[p.id] ?? p.phone"
+                  (ngModelChange)="setPhoneEdit(p.id, $event)"
+                />
+                <button
+                  type="button"
+                  class="ghost-button small"
+                  [disabled]="phoneEditLookup()[p.id] === 'self'"
+                  (click)="savePhone(p.id)"
+                >
+                  {{ 'users.save' | t }}
+                </button>
+              </div>
               <button type="button" class="danger-button small" (click)="remove(p.id, p.name)">
                 {{ 'users.delete' | t }}
               </button>
             </div>
+            @if (phoneEditLookup()[p.id] === 'checking') {
+              <small class="field-hint">{{ 'party.phoneChecking' | t }}</small>
+            } @else if (phoneEditLookup()[p.id] === 'self') {
+              <small class="field-hint">{{ 'party.phoneSelf' | t }}</small>
+            } @else if (phoneEditLookup()[p.id] === 'notfound') {
+              <small class="field-hint">{{ 'party.phoneNotFound' | t }}</small>
+            } @else if (phoneEditLookup()[p.id] && phoneEditLookup()[p.id] !== 'idle') {
+              <small class="field-hint">✓ {{ 'party.phoneFoundPrefix' | t }} {{ phoneEditLookup()[p.id] }}</small>
+            }
           </div>
         }
       </div>

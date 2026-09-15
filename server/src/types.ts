@@ -57,6 +57,19 @@ export type LotInput = Omit<Lot, 'id' | 'createdAt' | 'updatedAt'>;
 export interface Party {
   id: string;
   name: string;
+  /** Normalized 10-digit mobile number, or '' if this party has no linked
+   *  account. When set to a real account's number, `name` is kept in sync
+   *  with that account's own registered name by the server — see
+   *  `links.routes.ts` and the phone-handling in `parties.routes.ts`. */
+  phone: string;
+}
+
+/** A jobber's lot, as returned to a Party account that has been linked to it. */
+export type SharedLot = Lot & { sharedBy: { username: string; name: string } };
+
+export interface LinkedJobber {
+  username: string;
+  name: string;
 }
 
 /** A user as the client is allowed to see them — never includes `pinHash`. */

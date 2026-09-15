@@ -3,6 +3,7 @@ import express from 'express';
 import { env } from './env.js';
 import { errorHandler } from './http.js';
 import { authRouter } from './routes/auth.routes.js';
+import { linksRouter } from './routes/links.routes.js';
 import { lotsRouter } from './routes/lots.routes.js';
 import { partiesRouter } from './routes/parties.routes.js';
 import { suppliersRouter } from './routes/suppliers.routes.js';
@@ -48,6 +49,7 @@ app.use('/api/lots', lotsRouter);
 app.use('/api/parties', partiesRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/suppliers', suppliersRouter);
+app.use('/api/links', linksRouter);
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Unknown endpoint' });

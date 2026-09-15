@@ -13,7 +13,9 @@ import {
   type LotStatus,
 } from '../types.js';
 
-function docToLot(snap: QueryDocumentSnapshot): Lot {
+/** Exported for `links.routes.ts`, which maps the same Firestore shape when
+ *  reading another owner's lots for a linked party account. */
+export function docToLot(snap: QueryDocumentSnapshot): Lot {
   const data = snap.data();
   return {
     id: snap.id,

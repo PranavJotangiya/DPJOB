@@ -11,5 +11,6 @@ export const routes: Routes = [
   { path: 'settings', loadComponent: () => import('./features/settings/settings').then((m) => m.Settings) },
   { path: 'users', loadComponent: () => import('./features/users/users').then((m) => m.Users) },
   { path: 'parties', loadComponent: () => import('./features/parties/parties').then((m) => m.Parties) },
+  { path: 'shared-lots', loadComponent: () => import('./features/shared-lots/shared-lots').then((m) => m.SharedLots) },
   { path: '**', redirectTo: 'dashboard' },
 ];

@@ -18,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'parties', route: '/parties' },
   { id: 'bale', route: '/bale' },
   { id: 'reports', route: '/reports' },
+  { id: 'sharedLots', route: '/shared-lots' },
   { id: 'users', route: '/users' },
   { id: 'settings', route: '/settings' },
 ];
@@ -29,13 +30,14 @@ const BN_ICONS: Record<string, string> = {
   parties: '🏷️',
   bale: '🧵',
   reports: '📊',
+  sharedLots: '🔗',
   users: '👥',
   settings: '⚙️',
 };
 
 // newLot sits in the middle so its round "+" button is centered in the bar.
 const PRIMARY_NAV = ['dashboard', 'lots', 'newLot', 'parties'];
-const MORE_NAV = ['bale', 'reports', 'users', 'settings'];
+const MORE_NAV = ['bale', 'reports', 'sharedLots', 'users', 'settings'];
 
 @Component({
   selector: 'app-shell',

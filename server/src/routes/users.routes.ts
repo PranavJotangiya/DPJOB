@@ -37,6 +37,23 @@ const usersStream = new OwnerStreams<PublicUser>(
 const validRole = (value: unknown): value is Role => ROLE_OPTIONS.includes(value as Role);
 const validPin = (pin: string): boolean => /^\d{4,8}$/.test(pin);
 
+/**
+ * Looks up another account by mobile number — the one deliberate exception to
+ * "you can only see your own account" in this file. Returns only the name (or
+ * null if there is no matching active account), so a party/jobber link can be
+ * confirmed before it's made. Nothing else about the account is ever exposed
+ * this way — no role, no createdAt, nothing. Used by the `/lookup` route
+ * below and by `parties.routes.ts` / `links.routes.ts` when a phone number is
+ * attached to a party record.
+ */
+export async function findRegisteredName(phone: string): Promise<string | null> {
+  if (!isValidPhone(phone)) return null;
+  const snap = await usersCol.doc(phone).get();
+  const data = snap.data();
+  if (!snap.exists || !data || data['active'] === false) return null;
+  return str(data['name'], phone);
+}
+
 /** Refuses anything that is not the caller's own account. */
 function requireSelf(caller: string, target: string): void {
   if (caller !== target) {
@@ -59,6 +76,22 @@ usersRouter.get(
   requireAuth,
   wrap(async (req, res) => {
     res.json(await usersStream.for(ownerOf(req)).current());
+  }),
+);
+
+/**
+ * Looks up whether a mobile number belongs to a registered, active account —
+ * and whose. This exists so a party/jobber link can be confirmed before it's
+ * made (see the party-phone feature in `parties.routes.ts` and
+ * `links.routes.ts`); it returns only a name, nothing else about the account.
+ */
+usersRouter.get(
+  '/lookup',
+  requireAuth,
+  wrap(async (req, res) => {
+    const phone = normalizePhone(req.query['phone']);
+    if (!isValidPhone(phone)) throw badRequest('Enter a valid 10-digit mobile number');
+    res.json({ name: await findRegisteredName(phone) });
   }),
 );
 
