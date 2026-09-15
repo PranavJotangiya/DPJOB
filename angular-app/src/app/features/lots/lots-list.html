@@ -24,7 +24,9 @@
         [message]="(lotsService.lots().length === 0 ? 'empty.noLotsList' : 'empty.noMatchMsg') | t"
       >
         @if (lotsService.lots().length === 0) {
-          <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
+          @if (!session.isParty()) {
+            <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
+          }
         } @else {
           <button type="button" class="ghost-button" (click)="clearSearch()">{{ 'btn.clearSearch' | t }}</button>
         }

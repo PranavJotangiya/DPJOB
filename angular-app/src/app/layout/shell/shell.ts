@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { I18nService } from '../../core/i18n.service';
+import { SessionService } from '../../core/session.service';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import type { LangCode } from '../../core/models';
@@ -48,13 +49,20 @@ const MORE_NAV = ['bale', 'reports', 'sharedLots', 'users', 'settings'];
 export class Shell {
   readonly ui = inject(UiStore);
   readonly i18n = inject(I18nService);
+  readonly session = inject(SessionService);
 
   readonly icons = BN_ICONS;
 
-  private readonly visibleItems = computed(() => NAV_ITEMS);
+  // A Party account doesn't file its own job cards, so "New Lot" is left out
+  // of every nav surface for it — see SessionService.isParty.
+  private readonly visibleItems = computed(() =>
+    this.session.isParty() ? NAV_ITEMS.filter((n) => n.id !== 'newLot') : NAV_ITEMS,
+  );
   readonly navItems = this.visibleItems;
   readonly primaryNav = computed(() =>
-    PRIMARY_NAV.map((id) => this.visibleItems().find((n) => n.id === id)!).filter(Boolean),
+    PRIMARY_NAV.map((id) => this.visibleItems().find((n) => n.id === id)).filter(
+      (n): n is NavItem => !!n,
+    ),
   );
   readonly moreNav = computed(() =>
     MORE_NAV.map((id) => this.visibleItems().find((n) => n.id === id)).filter(

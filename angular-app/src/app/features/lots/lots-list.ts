@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
+import { SessionService } from '../../core/session.service';
 import { LotsService } from '../../core/lots.service';
 import { PdfService } from '../../core/pdf.service';
 import { I18nService } from '../../core/i18n.service';
@@ -30,6 +31,7 @@ const FILTERS: Array<[string, string]> = [
 })
 export class LotsList implements OnInit {
   readonly ui = inject(UiStore);
+  readonly session = inject(SessionService);
   readonly lotsService = inject(LotsService);
   private pdf = inject(PdfService);
   private i18n = inject(I18nService);

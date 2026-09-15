@@ -40,7 +40,9 @@
 
         <div class="topbar-actions">
           <a class="ghost-button" routerLink="/lots">{{ 'btn.viewLots' | t }}</a>
-          <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
+          @if (!session.isParty()) {
+            <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
+          }
         </div>
       </header>
 

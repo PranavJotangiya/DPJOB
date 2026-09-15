@@ -21,6 +21,17 @@
         <label class="field-label">{{ 'users.pin' | t }}</label>
         <input inputmode="numeric" maxlength="6" [ngModel]="form().pin" (ngModelChange)="patch('pin', $event)" />
       </div>
+      <div class="field-group">
+        <label class="field-label">{{ 'signup.accountType' | t }}</label>
+        <div class="chip-row">
+          <button type="button" class="chip" [class.selected]="form().accountType === 'jobber'" (click)="setAccountType('jobber')">
+            {{ 'signup.jobber' | t }}
+          </button>
+          <button type="button" class="chip" [class.selected]="form().accountType === 'party'" (click)="setAccountType('party')">
+            {{ 'signup.party' | t }}
+          </button>
+        </div>
+      </div>
     </div>
     @if (takenError()) {
       <div class="login-error">{{ 'users.taken' | t }}</div>
@@ -40,6 +51,9 @@
           <div class="user-main">
             <strong>{{ u.name }}</strong>
             <span class="user-uname">{{ u.username }}</span>
+            @if (u.accountType) {
+              <span class="user-you">{{ 'signup.' + u.accountType | t }}</span>
+            }
             @if (u.username === session.currentUser()?.username) {
               <span class="user-you">{{ 'users.you' | t }}</span>
             }

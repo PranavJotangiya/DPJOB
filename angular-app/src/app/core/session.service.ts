@@ -31,6 +31,15 @@ export class SessionService {
    */
   readonly isSignedIn = computed(() => this.currentUser() !== null);
 
+  /**
+   * A UI convenience only — a Party account doesn't file its own job cards,
+   * so the "New Lot" entry points are hidden for it. This is not access
+   * control: the server still accepts a lot from any signed-in account
+   * regardless of `accountType` (an account can legitimately be both a
+   * jobber and a linked party at once — see the party↔jobber feature).
+   */
+  readonly isParty = computed(() => this.currentUser()?.accountType === 'party');
+
   constructor() {
     void this.boot();
   }

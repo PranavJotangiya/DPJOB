@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
+import { SessionService } from '../../core/session.service';
 import { LotsService } from '../../core/lots.service';
 import { PartiesService } from '../../core/parties.service';
 import { StatCard } from '../../shared/stat-card/stat-card';
@@ -20,6 +21,7 @@ const PARTY_KEY = 'dp-dash-party';
 })
 export class Dashboard implements OnInit {
   readonly ui = inject(UiStore);
+  readonly session = inject(SessionService);
   readonly lotsService = inject(LotsService);
   private partiesService = inject(PartiesService);
   private router = inject(Router);

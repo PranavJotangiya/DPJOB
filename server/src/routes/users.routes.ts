@@ -114,6 +114,9 @@ usersRouter.post(
     // valid one, otherwise fall back to a neutral default. It has no effect on
     // access — being signed in is the only thing that gates anything.
     const role: Role = validRole(b['role']) ? b['role'] : 'Operator';
+    const accountType: AccountType = ACCOUNT_TYPES.includes(b['accountType'] as AccountType)
+      ? (b['accountType'] as AccountType)
+      : 'jobber';
 
     if (!isValidPhone(username)) throw badRequest('Enter a valid 10-digit mobile number');
     if (!validPin(pin)) throw badRequest('PIN must be 4-8 digits');
@@ -122,11 +125,12 @@ usersRouter.post(
     await usersCol.doc(username).set({
       name: str(b['name']).trim() || username,
       role,
+      accountType,
       active: true,
       pinHash: hashPin(pin),
       createdAt: new Date().toISOString(),
     });
-    res.status(201).json({ username });
+    res.status(201).json({ username, accountType });
   }),
 );
 

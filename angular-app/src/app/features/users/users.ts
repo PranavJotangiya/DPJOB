@@ -4,6 +4,7 @@ import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import { SessionService } from '../../core/session.service';
 import { UsersService } from '../../core/users.service';
+import type { AccountType } from '../../core/models';
 
 @Component({
   selector: 'app-users',
@@ -18,10 +19,11 @@ export class Users implements OnInit {
 
   readonly users = this.usersService.users;
 
-  readonly form = signal<{ username: string; name: string; pin: string }>({
+  readonly form = signal<{ username: string; name: string; pin: string; accountType: AccountType }>({
     username: '',
     name: '',
     pin: '',
+    accountType: 'jobber',
   });
   readonly takenError = signal(false);
 
@@ -41,6 +43,10 @@ export class Users implements OnInit {
     this.takenError.set(false);
   }
 
+  setAccountType(accountType: AccountType): void {
+    this.form.update((f) => ({ ...f, accountType }));
+  }
+
   async add(): Promise<void> {
     const f = this.form();
     if (!this.canAdd()) return;
@@ -55,7 +61,7 @@ export class Users implements OnInit {
       this.takenError.set(true);
       return;
     }
-    this.form.set({ username: '', name: '', pin: '' });
+    this.form.set({ username: '', name: '', pin: '', accountType: 'jobber' });
   }
 
   setPinEdit(username: string, value: string): void {

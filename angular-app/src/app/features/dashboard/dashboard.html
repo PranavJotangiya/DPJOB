@@ -26,7 +26,9 @@
       <app-skeleton-rows [rows]="5" />
     } @else if (lots().length === 0) {
       <app-empty-state [title]="'empty.noLotsTitle' | t" [message]="'empty.noLotsDash' | t">
-        <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
+        @if (!session.isParty()) {
+          <a class="primary-button" routerLink="/lots/new">{{ 'btn.newLot' | t }}</a>
+        }
       </app-empty-state>
     } @else {
       <div class="cut-list">
