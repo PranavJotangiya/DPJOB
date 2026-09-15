@@ -7,6 +7,11 @@
         <option [value]="opt.value">{{ opt.label }}</option>
       }
     </select>
+    @if (isParty()) {
+      <a class="ghost-button small" routerLink="/shared-lots">+ {{ 'dash.addJobber' | t }}</a>
+    } @else {
+      <a class="ghost-button small" routerLink="/parties">+ {{ 'party.add' | t }}</a>
+    }
   </div>
 
   <div class="summary-grid">
