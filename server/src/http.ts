@@ -44,6 +44,18 @@ export const num = (value: unknown, fallback = 0): number => {
 };
 
 /**
+ * Accounts are identified by mobile number. Strips everything but digits and
+ * drops a leading "91" country code, so "+91 98765-43210", "91 9876543210"
+ * and "9876543210" all normalize to the same 10-digit id.
+ */
+export const normalizePhone = (value: unknown): string => {
+  const digits = str(value).replace(/\D/g, '');
+  return digits.length === 12 && digits.startsWith('91') ? digits.slice(2) : digits;
+};
+
+export const isValidPhone = (value: string): boolean => /^\d{10}$/.test(value);
+
+/**
  * Express 5 types a route param as `string | string[]`; every param this API
  * declares is a single segment, so narrow it once here.
  */

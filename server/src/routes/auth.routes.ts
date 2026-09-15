@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { issueToken, requireAuth } from '../auth.js';
 import { usersCol } from '../firebase.js';
-import { badRequest, str, wrap } from '../http.js';
+import { badRequest, isValidPhone, normalizePhone, str, wrap } from '../http.js';
 import { hashPin, pinMatches } from '../pin.js';
 import type { Role, SessionUser } from '../types.js';
 
@@ -27,9 +27,9 @@ authRouter.post(
     if (!(await usersEmpty())) throw badRequest('Setup has already been completed');
 
     const b = (req.body ?? {}) as Record<string, unknown>;
-    const username = str(b['username']).trim().toLowerCase();
+    const username = normalizePhone(b['username']);
     const pin = str(b['pin']).trim();
-    if (!username) throw badRequest('Username is required');
+    if (!isValidPhone(username)) throw badRequest('Enter a valid 10-digit mobile number');
     if (!/^\d{4,8}$/.test(pin)) throw badRequest('PIN must be 4-8 digits');
 
     const name = str(b['name']).trim() || username;
@@ -47,23 +47,30 @@ authRouter.post(
 );
 
 /**
- * Username + PIN, checked server-side. The PIN hashes stay in Firestore where
- * only this server can read them, and the client gets back a signed token that
- * every other endpoint requires.
+ * Mobile number + PIN, checked server-side. Accounts are created with a
+ * normalized 10-digit number as their id, but a handful of accounts created
+ * before this app asked for a mobile number keep their original username —
+ * so a phone-shaped input is normalized before the lookup, and anything else
+ * falls back to the old trim + lowercase behaviour.
+ *
+ * The PIN hashes stay in Firestore where only this server can read them, and
+ * the client gets back a signed token that every other endpoint requires.
  */
 authRouter.post(
   '/login',
   wrap(async (req, res) => {
     const b = (req.body ?? {}) as Record<string, unknown>;
-    const username = str(b['username']).trim().toLowerCase();
+    const raw = str(b['username']).trim();
+    const phone = normalizePhone(raw);
+    const username = isValidPhone(phone) ? phone : raw.toLowerCase();
     const pin = str(b['pin']).trim();
-    if (!username || !pin) throw badRequest('Username and PIN are required');
+    if (!username || !pin) throw badRequest('Mobile number and PIN are required');
 
     const snap = await usersCol.doc(username).get();
     const data = snap.data();
-    // One message for every failure — no hints about which usernames exist.
+    // One message for every failure — no hints about which numbers exist.
     if (!snap.exists || !data || data['active'] === false || !pinMatches(pin, data['pinHash'])) {
-      res.status(401).json({ error: 'Wrong username or PIN' });
+      res.status(401).json({ error: 'Wrong mobile number or PIN' });
       return;
     }
 

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { FieldPath } from 'firebase-admin/firestore';
 import { requireAuth } from '../auth.js';
 import { usersCol } from '../firebase.js';
-import { badRequest, notFound, param, str, wrap } from '../http.js';
+import { badRequest, isValidPhone, normalizePhone, notFound, param, str, wrap } from '../http.js';
 import { hashPin } from '../pin.js';
 import { ownerOf } from '../owner.js';
 import { OwnerStreams } from '../stream.js';
@@ -72,16 +72,16 @@ usersRouter.post(
   requireAuth,
   wrap(async (req, res) => {
     const b = (req.body ?? {}) as Record<string, unknown>;
-    const username = str(b['username']).trim().toLowerCase();
+    const username = normalizePhone(b['username']);
     const pin = str(b['pin']).trim();
     // Role is no longer surfaced in the app; accept it if a caller still sends a
     // valid one, otherwise fall back to a neutral default. It has no effect on
     // access — being signed in is the only thing that gates anything.
     const role: Role = validRole(b['role']) ? b['role'] : 'Operator';
 
-    if (!username) throw badRequest('Username is required');
+    if (!isValidPhone(username)) throw badRequest('Enter a valid 10-digit mobile number');
     if (!validPin(pin)) throw badRequest('PIN must be 4-8 digits');
-    if ((await usersCol.doc(username).get()).exists) throw badRequest('That username is taken');
+    if ((await usersCol.doc(username).get()).exists) throw badRequest('That mobile number is already registered');
 
     await usersCol.doc(username).set({
       name: str(b['name']).trim() || username,

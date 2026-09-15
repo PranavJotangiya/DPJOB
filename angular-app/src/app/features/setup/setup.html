@@ -20,11 +20,14 @@
       <span class="field-label">{{ 'login.username' | t }}</span>
       <input
         name="username"
-        autocapitalize="none"
-        autocomplete="username"
+        type="tel"
+        inputmode="numeric"
+        maxlength="10"
+        autocomplete="tel"
         [ngModel]="username()"
         (ngModelChange)="username.set($event)"
       />
+      <small class="field-hint">{{ 'fh.mobile' | t }}</small>
     </label>
 
     <label class="field-group">

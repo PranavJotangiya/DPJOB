@@ -4,7 +4,14 @@
     <div class="wizard-grid">
       <div class="field-group">
         <label class="field-label">{{ 'users.username' | t }}</label>
-        <input autocapitalize="none" [ngModel]="form().username" (ngModelChange)="patch('username', $event)" />
+        <input
+          type="tel"
+          inputmode="numeric"
+          maxlength="10"
+          [ngModel]="form().username"
+          (ngModelChange)="patch('username', $event)"
+        />
+        <small class="field-hint">{{ 'fh.mobile' | t }}</small>
       </div>
       <div class="field-group">
         <label class="field-label">{{ 'users.name' | t }}</label>
@@ -32,7 +39,7 @@
         <div class="user-row" [class.disabled]="!u.active">
           <div class="user-main">
             <strong>{{ u.name }}</strong>
-            <span class="user-uname">@{{ u.username }}</span>
+            <span class="user-uname">{{ u.username }}</span>
             @if (u.username === session.currentUser()?.username) {
               <span class="user-you">{{ 'users.you' | t }}</span>
             }

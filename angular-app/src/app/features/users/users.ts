@@ -29,7 +29,7 @@ export class Users implements OnInit {
 
   readonly canAdd = computed(() => {
     const f = this.form();
-    return f.username.trim().length > 0 && /^\d{4,6}$/.test(f.pin);
+    return /^\d{10}$/.test(f.username.trim()) && /^\d{4,6}$/.test(f.pin);
   });
 
   ngOnInit(): void {

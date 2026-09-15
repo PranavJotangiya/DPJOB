@@ -25,8 +25,9 @@ export class Setup {
   readonly languages = this.i18n.languages;
 
   readonly pinValid = computed(() => /^\d{4,6}$/.test(this.pin()));
+  readonly mobileValid = computed(() => /^\d{10}$/.test(this.username().trim()));
   readonly canSubmit = computed(
-    () => this.username().trim().length > 0 && this.pinValid() && this.pin() === this.pin2(),
+    () => this.mobileValid() && this.pinValid() && this.pin() === this.pin2(),
   );
 
   onLang(event: Event): void {

@@ -15,8 +15,10 @@
       <span class="field-label">{{ 'login.username' | t }}</span>
       <input
         name="username"
-        autocomplete="username"
-        autocapitalize="none"
+        type="tel"
+        inputmode="numeric"
+        maxlength="20"
+        autocomplete="tel"
         [ngModel]="username()"
         (ngModelChange)="username.set($event); error.set(false)"
       />
