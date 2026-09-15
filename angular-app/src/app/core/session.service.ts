@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ApiService } from './api';
 import { TokenStore } from './token.store';
-import type { SessionUser } from './models';
+import type { AccountType, SessionUser } from './models';
 
 interface LoginResponse {
   token: string;
@@ -61,6 +61,16 @@ export class SessionService {
   async createFirstAdmin(input: { username: string; name: string; pin: string }): Promise<void> {
     this.tokens.set(await this.api.post<LoginResponse>('/auth/setup', input));
     this.needsSetup.set(false);
+  }
+
+  /** The login screen's "Create account" toggle — open any time, not just first-run. */
+  async register(input: {
+    username: string;
+    name: string;
+    pin: string;
+    accountType: AccountType;
+  }): Promise<void> {
+    this.tokens.set(await this.api.post<LoginResponse>('/auth/register', input));
   }
 
   /** Returns true on success; false for unknown user / wrong PIN / disabled. */

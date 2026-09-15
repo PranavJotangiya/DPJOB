@@ -3,11 +3,13 @@ import { issueToken, requireAuth } from '../auth.js';
 import { usersCol } from '../firebase.js';
 import { badRequest, isValidPhone, normalizePhone, str, wrap } from '../http.js';
 import { hashPin, pinMatches } from '../pin.js';
-import type { Role, SessionUser } from '../types.js';
+import { ACCOUNT_TYPES, type AccountType, type Role, type SessionUser } from '../types.js';
 
 export const authRouter = Router();
 
 const usersEmpty = async (): Promise<boolean> => (await usersCol.limit(1).get()).empty;
+const accountTypeOf = (data: FirebaseFirestore.DocumentData | undefined): AccountType | undefined =>
+  ACCOUNT_TYPES.includes(data?.['accountType']) ? (data!['accountType'] as AccountType) : undefined;
 
 /** Drives the first-run setup screen. */
 authRouter.get(
@@ -47,6 +49,43 @@ authRouter.post(
 );
 
 /**
+ * Ongoing sign-up — unlike `/setup`, always open, not just while the `users`
+ * collection is empty. This is what the login screen's "Create account"
+ * toggle calls. `accountType` is purely descriptive (see `types.ts`); it
+ * never gates anything, so an invalid or missing value just falls back to
+ * 'jobber' rather than failing the whole request.
+ */
+authRouter.post(
+  '/register',
+  wrap(async (req, res) => {
+    const b = (req.body ?? {}) as Record<string, unknown>;
+    const username = normalizePhone(b['username']);
+    const pin = str(b['pin']).trim();
+    const name = str(b['name']).trim();
+    const accountType: AccountType = ACCOUNT_TYPES.includes(b['accountType'] as AccountType)
+      ? (b['accountType'] as AccountType)
+      : 'jobber';
+
+    if (!isValidPhone(username)) throw badRequest('Enter a valid 10-digit mobile number');
+    if (!/^\d{4,8}$/.test(pin)) throw badRequest('PIN must be 4-8 digits');
+    if (!name) throw badRequest('Company / your name is required');
+    if ((await usersCol.doc(username).get()).exists) throw badRequest('That mobile number is already registered');
+
+    await usersCol.doc(username).set({
+      name,
+      accountType,
+      role: 'Operator' as Role,
+      active: true,
+      pinHash: hashPin(pin),
+      createdAt: new Date().toISOString(),
+    });
+
+    const user: SessionUser = { username, name, role: 'Operator', accountType };
+    res.status(201).json({ token: issueToken(user), user });
+  }),
+);
+
+/**
  * Mobile number + PIN, checked server-side. Accounts are created with a
  * normalized 10-digit number as their id, but a handful of accounts created
  * before this app asked for a mobile number keep their original username —
@@ -78,6 +117,7 @@ authRouter.post(
       username,
       name: str(data['name'], username),
       role: (data['role'] as Role) ?? 'Operator',
+      accountType: accountTypeOf(data),
     };
     res.json({ token: issueToken(user), user });
   }),
@@ -98,6 +138,7 @@ authRouter.get(
       username: req.user!.username,
       name: str(data['name'], req.user!.username),
       role: (data['role'] as Role) ?? 'Operator',
+      accountType: accountTypeOf(data),
     });
   }),
 );

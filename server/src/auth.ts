@@ -23,7 +23,12 @@ function verify(token: string): SessionUser | null {
   try {
     const payload = jwt.verify(token, env.sessionSecret) as Partial<SessionUser>;
     if (!payload?.username || !payload.role) return null;
-    return { username: payload.username, name: payload.name ?? payload.username, role: payload.role };
+    return {
+      username: payload.username,
+      name: payload.name ?? payload.username,
+      role: payload.role,
+      accountType: payload.accountType,
+    };
   } catch {
     return null;
   }

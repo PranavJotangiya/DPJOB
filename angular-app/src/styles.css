@@ -1888,6 +1888,8 @@ tbody tr:last-child td { border-bottom: 0; }
   gap: 14px;
 }
 .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
+.login-mode-toggle { display: flex; gap: 8px; margin-bottom: 2px; }
+.login-mode-toggle .chip { flex: 1; justify-content: center; }
 .login-brand h2 { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--ink); line-height: 1.1; }
 .login-brand small {
   color: var(--label);

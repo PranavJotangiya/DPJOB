@@ -95,6 +95,11 @@ export type Role = 'Admin' | 'Supervisor' | 'Operator' | 'Viewer';
 export const ROLE_OPTIONS: Role[] = ['Admin', 'Supervisor', 'Operator', 'Viewer'];
 export type LangCode = 'en' | 'hi' | 'gu';
 
+/** Chosen at sign-up, purely descriptive — see server/src/types.ts. An
+ *  account can legitimately be both at once (a jobber also linked as a party
+ *  under someone else's job cards), so this never gates anything. */
+export type AccountType = 'jobber' | 'party';
+
 /**
  * A user as the API returns it. The stored PIN hash stays on the server — it is
  * deliberately not part of this shape.
@@ -103,6 +108,7 @@ export interface AppUser {
   username: string;
   name: string;
   role: Role;
+  accountType?: AccountType;
   active: boolean;
   createdAt: string;
 }
@@ -112,6 +118,7 @@ export interface SessionUser {
   username: string;
   name: string;
   role: Role;
+  accountType?: AccountType;
 }
 
 /** Editing an existing lot: seed the form from it (merging in any sizes it's

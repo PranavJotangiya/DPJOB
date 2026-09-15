@@ -6,7 +6,7 @@ import { badRequest, isValidPhone, normalizePhone, notFound, param, str, wrap } 
 import { hashPin } from '../pin.js';
 import { ownerOf } from '../owner.js';
 import { OwnerStreams } from '../stream.js';
-import { ROLE_OPTIONS, type PublicUser, type Role } from '../types.js';
+import { ACCOUNT_TYPES, ROLE_OPTIONS, type AccountType, type PublicUser, type Role } from '../types.js';
 
 /**
  * Accounts are private. A signed-in user can read and change exactly one
@@ -28,6 +28,9 @@ const usersStream = new OwnerStreams<PublicUser>(
         username: d.id,
         name: str(data['name'], d.id),
         role: (data['role'] as Role) ?? 'Operator',
+        accountType: ACCOUNT_TYPES.includes(data['accountType'] as AccountType)
+          ? (data['accountType'] as AccountType)
+          : undefined,
         active: data['active'] !== false,
         createdAt: str(data['createdAt']),
       };

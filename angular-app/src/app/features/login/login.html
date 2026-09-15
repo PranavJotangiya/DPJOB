@@ -1,5 +1,5 @@
 <div class="login-screen">
-  <form class="login-card" (ngSubmit)="submit()">
+  <form class="login-card" (ngSubmit)="onSubmit()">
     <div class="login-brand">
       <div class="brand-mark">DP</div>
       <div>
@@ -8,40 +8,126 @@
       </div>
     </div>
 
-    <h1>{{ 'login.title' | t }}</h1>
-    <p class="login-sub">{{ 'login.subtitle' | t }}</p>
+    <div class="login-mode-toggle" role="tablist">
+      <button type="button" class="chip" [class.selected]="mode() === 'login'" (click)="setMode('login')">
+        {{ 'login.modeLogin' | t }}
+      </button>
+      <button type="button" class="chip" [class.selected]="mode() === 'signup'" (click)="setMode('signup')">
+        {{ 'login.modeSignup' | t }}
+      </button>
+    </div>
 
-    <label class="field-group">
-      <span class="field-label">{{ 'login.username' | t }}</span>
-      <input
-        name="username"
-        type="tel"
-        inputmode="numeric"
-        maxlength="20"
-        autocomplete="tel"
-        [ngModel]="username()"
-        (ngModelChange)="username.set($event); error.set(false)"
-      />
-    </label>
+    @if (mode() === 'login') {
+      <h1>{{ 'login.title' | t }}</h1>
+      <p class="login-sub">{{ 'login.subtitle' | t }}</p>
 
-    <label class="field-group">
-      <span class="field-label">{{ 'login.pin' | t }}</span>
-      <input
-        name="pin"
-        type="password"
-        inputmode="numeric"
-        autocomplete="current-password"
-        [ngModel]="pin()"
-        (ngModelChange)="pin.set($event); error.set(false)"
-      />
-    </label>
+      <label class="field-group">
+        <span class="field-label">{{ 'login.username' | t }}</span>
+        <input
+          name="username"
+          type="tel"
+          inputmode="numeric"
+          maxlength="20"
+          autocomplete="tel"
+          [ngModel]="username()"
+          (ngModelChange)="username.set($event); error.set(false)"
+        />
+      </label>
 
-    @if (error()) {
-      <div class="login-error">{{ 'login.error' | t }}</div>
+      <label class="field-group">
+        <span class="field-label">{{ 'login.pin' | t }}</span>
+        <input
+          name="pin"
+          type="password"
+          inputmode="numeric"
+          autocomplete="current-password"
+          [ngModel]="pin()"
+          (ngModelChange)="pin.set($event); error.set(false)"
+        />
+      </label>
+
+      @if (error()) {
+        <div class="login-error">{{ 'login.error' | t }}</div>
+      }
+    } @else {
+      <h1>{{ 'signup.title' | t }}</h1>
+      <p class="login-sub">{{ 'signup.subtitle' | t }}</p>
+
+      <label class="field-group">
+        <span class="field-label">{{ 'signup.companyName' | t }}</span>
+        <input
+          name="companyName"
+          [ngModel]="companyName()"
+          (ngModelChange)="companyName.set($event)"
+        />
+      </label>
+
+      <label class="field-group">
+        <span class="field-label">{{ 'login.username' | t }}</span>
+        <input
+          name="signupPhone"
+          type="tel"
+          inputmode="numeric"
+          maxlength="10"
+          [placeholder]="'fh.mobile' | t"
+          [ngModel]="signupPhone()"
+          (ngModelChange)="setSignupPhone($event)"
+        />
+      </label>
+
+      <div class="field-group">
+        <span class="field-label">{{ 'signup.accountType' | t }}</span>
+        <div class="chip-row">
+          <button type="button" class="chip" [class.selected]="accountType() === 'jobber'" (click)="accountType.set('jobber')">
+            {{ 'signup.jobber' | t }}
+          </button>
+          <button type="button" class="chip" [class.selected]="accountType() === 'party'" (click)="accountType.set('party')">
+            {{ 'signup.party' | t }}
+          </button>
+        </div>
+        <small class="field-hint">
+          {{ accountType() === 'jobber' ? ('signup.jobberHint' | t) : ('signup.partyHint' | t) }}
+        </small>
+      </div>
+
+      <label class="field-group">
+        <span class="field-label">{{ 'users.pin' | t }}</span>
+        <input
+          name="signupPin"
+          type="password"
+          inputmode="numeric"
+          maxlength="6"
+          [ngModel]="signupPin()"
+          (ngModelChange)="signupPin.set($event)"
+        />
+      </label>
+
+      <label class="field-group">
+        <span class="field-label">{{ 'setup.confirmPin' | t }}</span>
+        <input
+          name="signupPin2"
+          type="password"
+          inputmode="numeric"
+          maxlength="6"
+          [ngModel]="signupPin2()"
+          (ngModelChange)="signupPin2.set($event)"
+        />
+      </label>
+
+      @if (signupPin2().length > 0 && signupPin() !== signupPin2()) {
+        <div class="login-error">{{ 'setup.mismatch' | t }}</div>
+      }
+      @if (signupError()) {
+        <div class="login-error">{{ 'signup.error' | t }}</div>
+      }
     }
 
-    <button type="submit" class="primary-button" [disabled]="busy()">
-      {{ (busy() ? 'login.busy' : 'login.submit') | t }}
+    <button
+      type="submit"
+      class="primary-button"
+      [disabled]="busy() || (mode() === 'signup' && !canSignup())"
+    >
+      {{ (busy() ? 'login.busy' : mode() === 'login' ? 'login.submit' : 'signup.submit') | t }}
     </button>
 
     <select class="login-lang" (change)="onLang($event)" [value]="i18n.lang()">

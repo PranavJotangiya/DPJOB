@@ -9,6 +9,15 @@ export const LOT_STATUSES: LotStatus[] = ['Draft', 'Ready', 'Cutting', 'Complete
 export type Role = 'Admin' | 'Supervisor' | 'Operator' | 'Viewer';
 export const ROLE_OPTIONS: Role[] = ['Admin', 'Supervisor', 'Operator', 'Viewer'];
 
+/**
+ * What kind of account this is, chosen at sign-up. Purely descriptive — like
+ * `role`, it grants and withholds nothing, because an account can legitimately
+ * be both at once (a jobber who is also linked as a party under someone
+ * else's job cards). Never used for access control.
+ */
+export type AccountType = 'jobber' | 'party';
+export const ACCOUNT_TYPES: AccountType[] = ['jobber', 'party'];
+
 export interface Bale {
   id: string;
   baleNumber: string;
@@ -77,6 +86,7 @@ export interface PublicUser {
   username: string;
   name: string;
   role: Role;
+  accountType?: AccountType;
   active: boolean;
   createdAt: string;
 }
@@ -85,6 +95,7 @@ export interface SessionUser {
   username: string;
   name: string;
   role: Role;
+  accountType?: AccountType;
 }
 
 export const createEmptySizeBreakdown = (): Record<string, number> =>
