@@ -59,6 +59,15 @@ export class Shell {
 
   readonly icons = BN_ICONS;
 
+  // The brand block shows whoever is signed in, not a fixed app name —
+  // "DP Creation" was only ever the first account's own company name.
+  readonly brandName = computed(() => this.session.currentUser()?.name?.trim() || 'DP Creation');
+  readonly brandInitials = computed(() => {
+    const parts = this.brandName().split(/\s+/).filter(Boolean);
+    const initials = parts.length >= 2 ? parts[0][0] + parts[1][0] : this.brandName().slice(0, 2);
+    return initials.toUpperCase();
+  });
+
   // A Party account doesn't file its own job cards, so "New Lot" is left out
   // of every nav surface for it — see SessionService.isParty.
   private readonly visibleItems = computed(() =>
