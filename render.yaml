@@ -30,7 +30,11 @@ services:
       - key: FIREBASE_PROJECT_ID
         value: dp-creation-f3d30
       - key: CORS_ORIGINS
-        value: https://dp-creation-f3d30.web.app,https://dp-creation-f3d30.firebaseapp.com
+        # The last two are the Capacitor app's WebView origins (iOS uses the
+        # capacitor:// scheme; Android uses https:// per capacitor.config.ts's
+        # androidScheme) — not real domains, just what the native shell sends
+        # as Origin on every API request.
+        value: https://dp-creation-f3d30.web.app,https://dp-creation-f3d30.firebaseapp.com,capacitor://localhost,https://localhost
       - key: SESSION_TTL
         value: 30d
       - key: SESSION_SECRET
