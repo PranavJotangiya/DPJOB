@@ -24,6 +24,13 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  /* Android's WebView (and the installed app's own WebView) auto-boosts text
+     size for readability in narrow columns — it can inflate font sizes well
+     past what's actually set here, breaking every spacing assumption in this
+     file. This is invisible in a desktop browser, which is exactly why it
+     went unnoticed until the app was opened on a real device. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
