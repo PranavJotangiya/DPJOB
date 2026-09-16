@@ -15,10 +15,10 @@
   </div>
 
   <div class="summary-grid">
-    <app-stat-card icon="📦" [label]="'stat.activeLots' | t" [value]="stats().activeLots" tone="blue" />
-    <app-stat-card icon="✔️" [label]="'stat.completedLots' | t" [value]="stats().completedLots" tone="green" />
-    <app-stat-card icon="🧵" [label]="'stat.totalFabric' | t" [value]="stats().totalFabricUsed + ' MTR'" tone="slate" />
-    <app-stat-card [hero]="true" icon="🧺" [label]="'stat.totalPieces' | t" [value]="stats().totalPieces" tone="blue" />
+    <app-stat-card icon="box" [label]="'stat.activeLots' | t" [value]="stats().activeLots" tone="blue" />
+    <app-stat-card icon="checkCircle" [label]="'stat.completedLots' | t" [value]="stats().completedLots" tone="green" />
+    <app-stat-card icon="layers" [label]="'stat.totalFabric' | t" [value]="stats().totalFabricUsed + ' MTR'" tone="slate" />
+    <app-stat-card [hero]="true" [label]="'stat.totalPieces' | t" [value]="stats().totalPieces" tone="blue" />
   </div>
 
   <div class="dash-section">

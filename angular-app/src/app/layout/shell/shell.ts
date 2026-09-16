@@ -6,6 +6,7 @@ import { TPipe } from '../../core/t.pipe';
 import { UiStore } from '../../core/ui-store';
 import type { LangCode } from '../../core/models';
 import { LotDetailPanel } from '../../features/lot-detail-panel/lot-detail-panel';
+import { Icon } from '../../shared/icon/icon';
 
 interface NavItem {
   id: string;
@@ -25,15 +26,15 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const BN_ICONS: Record<string, string> = {
-  dashboard: '🏭',
-  newLot: '＋',
-  lots: '📋',
-  parties: '🏷️',
-  bale: '🧵',
-  reports: '📊',
-  sharedLots: '🔗',
-  users: '👥',
-  settings: '⚙️',
+  dashboard: 'grid',
+  newLot: 'plus',
+  lots: 'list',
+  parties: 'tag',
+  bale: 'box',
+  reports: 'chart',
+  sharedLots: 'link',
+  users: 'users',
+  settings: 'settings',
 };
 
 // The primary row's most useful slot differs by account type: a Jobber's
@@ -49,7 +50,7 @@ const MORE_NAV_PARTY = ['bale', 'reports', 'parties', 'users', 'settings'];
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TPipe, LotDetailPanel],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TPipe, LotDetailPanel, Icon],
   templateUrl: './shell.html',
 })
 export class Shell {

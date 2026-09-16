@@ -13,9 +13,9 @@
     <aside class="sidebar">
       <div class="sidebar-inner">
         <div class="brand-block">
-          <div class="brand-mark">DP</div>
+          <div class="brand-mark">{{ brandInitials() }}</div>
           <div>
-            <h2>DP Creation</h2>
+            <h2>{{ brandName() }}</h2>
             <small>Garment Cutting</small>
           </div>
         </div>
@@ -23,7 +23,7 @@
         <nav class="sidebar-nav">
           @for (item of navItems(); track item.id) {
             <a class="nav-button" [routerLink]="item.route" routerLinkActive="active">
-              <span class="nav-ico" aria-hidden="true">{{ icons[item.id] }}</span>
+              <span class="nav-ico" aria-hidden="true"><app-icon [name]="icons[item.id]" [size]="18" /></span>
               <span>{{ 'nav.' + item.id | t }}</span>
             </a>
           }
@@ -59,12 +59,12 @@
   <nav class="bottom-nav">
     @for (item of primaryNav(); track item.id) {
       <a [routerLink]="item.route" routerLinkActive="active" [class.cta]="item.id === 'newLot'">
-        <span class="bn-icon">{{ icons[item.id] }}</span>
+        <span class="bn-icon"><app-icon [name]="icons[item.id]" [size]="item.id === 'newLot' ? 22 : 20" /></span>
         <span>{{ 'nav.' + item.id | t }}</span>
       </a>
     }
     <button type="button" [class.active]="ui.moreOpen()" (click)="ui.moreOpen.set(true)">
-      <span class="bn-icon">☰</span>
+      <span class="bn-icon"><app-icon name="menu" [size]="20" /></span>
       <span>{{ 'nav.more' | t }}</span>
     </button>
   </nav>
@@ -75,7 +75,9 @@
         <div class="more-grabber"></div>
         <div class="more-sheet-head">
           <span>{{ 'nav.more' | t }}</span>
-          <button type="button" class="more-close" (click)="ui.moreOpen.set(false)" [attr.aria-label]="'btn.close' | t">×</button>
+          <button type="button" class="more-close" (click)="ui.moreOpen.set(false)" [attr.aria-label]="'btn.close' | t">
+            <app-icon name="close" [size]="18" />
+          </button>
         </div>
         @for (item of moreNav(); track item.id) {
           <a [routerLink]="item.route" routerLinkActive="active" (click)="ui.moreOpen.set(false)">

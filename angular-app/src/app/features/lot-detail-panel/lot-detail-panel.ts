@@ -6,13 +6,14 @@ import { LotsService } from '../../core/lots.service';
 import { PdfService } from '../../core/pdf.service';
 import { I18nService } from '../../core/i18n.service';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
+import { Icon } from '../../shared/icon/icon';
 
 const HIDDEN_SECTIONS = ['dashboard', 'newLot', 'editLot'];
 
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [TPipe, StatusBadge],
+  imports: [TPipe, StatusBadge, Icon],
   templateUrl: './lot-detail-panel.html',
 })
 export class LotDetailPanel {

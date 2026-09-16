@@ -950,9 +950,14 @@ tbody tr:last-child td { border-bottom: 0; }
   gap: 6px;
 }
 .empty-icon {
-  font-size: 2rem;
-  opacity: 0.55;
-  margin-bottom: 2px;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  background: var(--tile-blue-bg);
+  color: var(--tile-blue-fg);
+  margin-bottom: 4px;
 }
 .empty-state h4 {
   margin: 0;
@@ -1215,10 +1220,12 @@ tbody tr:last-child td { border-bottom: 0; }
   margin-bottom: 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   font-size: 0.875rem;
   font-weight: 400;
 }
+.error-row { display: flex; align-items: center; gap: 8px; }
+.error-row app-icon { flex-shrink: 0; }
 
 .form-section {
   padding-bottom: 18px;
@@ -1679,11 +1686,11 @@ tbody tr:last-child td { border-bottom: 0; }
 .more-close {
   flex-shrink: 0;
   width: 42px; height: 42px;
+  display: grid;
+  place-items: center;
   border: 1px solid var(--line);
   border-radius: 50%;
   background: var(--surface);
-  font-size: 1.5rem;
-  line-height: 1;
   color: var(--ink-2);
   cursor: pointer;
 }
@@ -1796,8 +1803,9 @@ tbody tr:last-child td { border-bottom: 0; }
   }
   .nav-ico {
     width: 20px;
-    text-align: center;
-    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
   }
   .nav-button:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
@@ -1965,6 +1973,9 @@ tbody tr:last-child td { border-bottom: 0; }
 .user-main strong { font-size: 1rem; color: #fff; }
 .user-uname { color: var(--on-dark-2); font-size: 0.85rem; }
 .user-you {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -2073,7 +2084,7 @@ tbody tr:last-child td { border-bottom: 0; }
 }
 
 /* ============================================================
-   Garment loader — shown while any API request is pending
+   Loading indicator — shown while any API request is pending
    ============================================================ */
 
 .loader-scrim {
@@ -2085,7 +2096,7 @@ tbody tr:last-child td { border-bottom: 0; }
   padding: 24px;
   background: rgba(23, 30, 25, 0.45);
   backdrop-filter: blur(3px);
-  animation: loader-fade 0.25s ease-in-out;
+  animation: loader-fade 0.2s ease-in-out;
 }
 
 .loader-card {
@@ -2093,83 +2104,38 @@ tbody tr:last-child td { border-bottom: 0; }
   border: 1px solid var(--line-2);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
-  padding: 30px 34px 26px;
+  padding: 28px 34px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  min-width: 220px;
+  min-width: 200px;
 }
 
-/* The garment sits in a sage ring that breathes while it waits. */
-.loader-ring {
-  width: 96px;
-  height: 96px;
+.loader-spinner {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  display: grid;
-  /* Every garment shares one cell, so the ring never resizes mid-cycle. */
-  grid-template-areas: 'garment';
-  place-items: center;
-  background: var(--primary-tint);
-  border: 2px solid var(--brand-100);
-  animation: loader-pulse 1.8s ease-in-out infinite;
-}
-
-/* All garments are stacked in the ring; only the current one is displayed.
-   Going from none -> block is what makes the swap animation replay. */
-.loader-garment {
-  grid-area: garment;
-  display: none;
-  font-size: 2.6rem;
-  line-height: 1;
-}
-.loader-garment.on {
-  display: block;
-  animation: loader-swap 0.45s ease-in-out;
+  border: 3px solid var(--brand-100);
+  border-top-color: var(--primary);
+  animation: loader-spin 0.7s linear infinite;
 }
 
 .loader-label {
-  font-size: 0.62rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--label);
+  color: var(--ink-3);
 }
-
-.loader-dots { display: flex; gap: 6px; }
-.loader-dots i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--brand);
-  opacity: 0.25;
-  animation: loader-dot 1.2s ease-in-out infinite;
-}
-.loader-dots i:nth-child(2) { animation-delay: 0.15s; }
-.loader-dots i:nth-child(3) { animation-delay: 0.3s; }
 
 @keyframes loader-fade {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes loader-swap {
-  0%   { opacity: 0; transform: translateY(8px) scale(0.8); }
-  60%  { opacity: 1; transform: translateY(0) scale(1.08); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes loader-pulse {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.06); }
-}
-@keyframes loader-dot {
-  0%, 100% { opacity: 0.25; transform: translateY(0); }
-  50%      { opacity: 1; transform: translateY(-4px); }
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .loader-scrim,
-  .loader-garment,
-  .loader-ring,
-  .loader-dots i { animation: none; }
-  .loader-dots i { opacity: 0.6; }
+  .loader-spinner { animation: none; }
 }

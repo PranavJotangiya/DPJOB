@@ -5,6 +5,7 @@ import { UiStore } from '../../core/ui-store';
 import { SessionService } from '../../core/session.service';
 import { PartiesService } from '../../core/parties.service';
 import { LotsService } from '../../core/lots.service';
+import { Icon } from '../../shared/icon/icon';
 
 /** 'idle' before 10 digits, 'checking' mid-debounce, 'notfound', 'self' (your
  *  own number), or the registered account's name. */
@@ -15,7 +16,7 @@ const DEBOUNCE_MS = 400;
 @Component({
   selector: 'app-parties',
   standalone: true,
-  imports: [FormsModule, TPipe],
+  imports: [FormsModule, TPipe, Icon],
   templateUrl: './parties.html',
 })
 export class Parties implements OnInit {

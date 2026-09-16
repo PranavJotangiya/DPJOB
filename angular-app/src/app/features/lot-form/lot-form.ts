@@ -9,6 +9,7 @@ import { PartiesService } from '../../core/parties.service';
 import { I18nService } from '../../core/i18n.service';
 import { fileToCompressedDataUrl } from '../../core/image';
 import { PatternPad } from '../pattern-pad/pattern-pad';
+import { Icon } from '../../shared/icon/icon';
 import {
   Bale,
   createEmptySizeBreakdown,
@@ -22,7 +23,7 @@ import {
 @Component({
   selector: 'app-lot-form',
   standalone: true,
-  imports: [FormsModule, TPipe, PatternPad, RouterLink],
+  imports: [FormsModule, TPipe, PatternPad, RouterLink, Icon],
   templateUrl: './lot-form.html',
 })
 export class LotForm implements OnInit {

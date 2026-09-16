@@ -9,6 +9,7 @@ import { I18nService } from '../../core/i18n.service';
 import { StatusBadge } from '../../shared/status-badge/status-badge';
 import { EmptyState } from '../../shared/empty-state/empty-state';
 import { SkeletonRows } from '../../shared/skeleton-rows/skeleton-rows';
+import { Icon } from '../../shared/icon/icon';
 
 /** 'idle' before 10 digits, 'checking' mid-debounce, 'notfound', 'self', or
  *  the registered account's name. */
@@ -26,7 +27,7 @@ const DEBOUNCE_MS = 400;
 @Component({
   selector: 'app-shared-lots',
   standalone: true,
-  imports: [FormsModule, TPipe, StatusBadge, EmptyState, SkeletonRows],
+  imports: [FormsModule, TPipe, StatusBadge, EmptyState, SkeletonRows, Icon],
   templateUrl: './shared-lots.html',
 })
 export class SharedLots implements OnInit {

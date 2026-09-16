@@ -57,7 +57,7 @@
               <strong>{{ p.name }}</strong>
               <span class="user-uname">{{ lotCount(p.name) }} {{ 'nav.lots' | t }}</span>
               @if (p.phone) {
-                <span class="user-you">🔗 {{ p.phone }}</span>
+                <span class="user-you"><app-icon name="link" [size]="12" /> {{ p.phone }}</span>
               }
             </div>
             <div class="user-controls">

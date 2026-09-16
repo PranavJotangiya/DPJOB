@@ -11,7 +11,7 @@
       @if (errors().length > 0) {
         <div class="error-box">
           @for (error of errors(); track error) {
-            <div>⚠ {{ error }}</div>
+            <div class="error-row"><app-icon name="alertTriangle" [size]="15" /> {{ error }}</div>
           }
         </div>
       }
